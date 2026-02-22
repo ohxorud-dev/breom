@@ -1,0 +1,500 @@
+@test
+fn for_count_runs_exact_iterations() {
+    mut ticks Int = 0
+    for 5 {
+        ticks = ticks + 1
+    }
+    assert(ticks == 5)
+}
+
+@test
+fn for_count_zero_runs_no_iterations() {
+    mut ticks Int = 0
+    for 0 {
+        ticks = ticks + 1
+    }
+    assert(ticks == 0)
+}
+
+@test
+fn for_infinite_loop_with_break_exits() {
+    mut i Int = 0
+    for {
+        i = i + 1
+        if i == 4 {
+            break
+        }
+    }
+    assert(i == 4)
+}
+
+@test
+fn for_condition_with_continue_skips_even_values() {
+    mut i Int = 0
+    mut odd_sum Int = 0
+    for i < 6 {
+        i = i + 1
+        if i % 2 == 0 {
+            continue
+        }
+        odd_sum = odd_sum + i
+    }
+    assert(odd_sum == 9)
+}
+
+@test
+fn for_range_index_only_accumulates_indices() {
+    values := [10, 20, 30, 40]
+    mut index_sum Int = 0
+    for i := range values {
+        index_sum = index_sum + i
+    }
+    assert(index_sum == 6)
+}
+
+@test
+fn for_range_index_and_value_weighted_sum() {
+    values := [2, 4, 6]
+    mut weighted_sum Int = 0
+    for i, v := range values {
+        weighted_sum = weighted_sum + (i + 1) * v
+    }
+    assert(weighted_sum == 28)
+}
+
+@test
+fn for_range_break_stops_iteration_early() {
+    values := [1, 2, 3, 4, 5]
+    mut count Int = 0
+    mut sum Int = 0
+
+    for i, v := range values {
+        if i == 3 {
+            break
+        }
+
+        sum = sum + v
+        count = count + 1
+    }
+
+    assert(sum == 6)
+    assert(count == 3)
+}
+
+@test
+fn for_count_one_runs_once() {
+    mut ticks Int = 0
+    for 1 {
+        ticks = ticks + 1
+    }
+    assert(ticks == 1)
+}
+
+@test
+fn for_count_nested_multiplication() {
+    mut ticks Int = 0
+    for 4 {
+        for 3 {
+            ticks = ticks + 1
+        }
+    }
+    assert(ticks == 12)
+}
+
+@test
+fn for_count_with_continue_and_break() {
+    mut i Int = 0
+    mut sum Int = 0
+    for 20 {
+        if i == 12 {
+            break
+        }
+        i = i + 1
+        if i % 3 == 0 {
+            continue
+        }
+        sum = sum + i
+    }
+    assert(i == 12)
+    assert(sum == 48)
+}
+
+@test
+fn for_condition_initially_false_skips_body() {
+    mut i Int = 5
+    for i < 5 {
+        i = i + 1
+    }
+    assert(i == 5)
+}
+
+@test
+fn for_condition_continue_does_not_skip_progress() {
+    mut i Int = 0
+    mut odd_sum Int = 0
+    for i < 10 {
+        i = i + 1
+        if i % 2 == 0 {
+            continue
+        }
+        odd_sum = odd_sum + i
+    }
+    assert(i == 10)
+    assert(odd_sum == 25)
+}
+
+@test
+fn for_condition_break_exits_exactly_once() {
+    mut i Int = 0
+    mut visited Int = 0
+    for i < 100 {
+        i = i + 1
+        visited = visited + 1
+        if i == 7 {
+            break
+        }
+    }
+    assert(i == 7)
+    assert(visited == 7)
+}
+
+@test
+fn for_infinite_multiple_continue_paths() {
+    mut i Int = 0
+    mut hits Int = 0
+    for {
+        i = i + 1
+        if i < 4 {
+            continue
+        }
+        if i % 2 == 0 {
+            hits = hits + 10
+            if i == 8 {
+                break
+            }
+            continue
+        }
+        hits = hits + 1
+    }
+    assert(i == 8)
+    assert(hits == 32)
+}
+
+@test
+fn for_infinite_nested_break_scope() {
+    mut outer Int = 0
+    mut inner_total Int = 0
+    for {
+        outer = outer + 1
+        mut inner Int = 0
+        for {
+            inner = inner + 1
+            inner_total = inner_total + 1
+            if inner == 3 {
+                break
+            }
+        }
+        if outer == 4 {
+            break
+        }
+    }
+    assert(outer == 4)
+    assert(inner_total == 12)
+}
+
+@test
+fn for_range_int_zero_runs_no_iterations() {
+    mut ticks Int = 0
+    for i := range 0 {
+        ticks = ticks + i + 1
+    }
+    assert(ticks == 0)
+}
+
+@test
+fn for_range_int_single_iteration() {
+    mut sum Int = 0
+    for i := range 1 {
+        sum = sum + i
+    }
+    assert(sum == 0)
+}
+
+@test
+fn for_range_int_uses_expression_limit() {
+    mut sum Int = 0
+    for i := range (3 + 4) {
+        sum = sum + i
+    }
+    assert(sum == 21)
+}
+
+@test
+fn for_range_int_uses_variable_limit() {
+    mut limit Int = 8
+    mut sum Int = 0
+    for i := range limit {
+        sum = sum + i
+    }
+    assert(sum == 28)
+}
+
+@test
+fn for_range_int_uses_len_inferred_limit() {
+    values := [3, 5, 7, 9]
+    limit := values.len()
+    mut sum Int = 0
+    for i := range limit {
+        sum = sum + i
+    }
+    assert(limit == 4)
+    assert(sum == 6)
+}
+
+@test
+fn len_result_can_be_used_in_int_arithmetic_without_annotation() {
+    values := [10, 20, 30]
+    n := values.len()
+    computed := n * 3 + 1
+    assert(computed == 10)
+}
+
+@test
+fn array_method_results_can_drive_range_with_inferred_types() {
+    arr := [1, 2, 3]
+    arr2 := arr.push(4)
+
+    got := arr2.get(2)
+    popped := arr2.pop()
+
+    mut got_sum Int = 0
+    for i := range got {
+        got_sum = got_sum + i
+    }
+    assert(got_sum == 3)
+
+    mut popped_sum Int = 0
+    for i := range popped {
+        popped_sum = popped_sum + i
+    }
+    assert(popped_sum == 6)
+}
+
+@test
+fn map_and_set_method_results_can_drive_range_with_inferred_types() {
+    m := (2: 5)
+    m.set(3, 7)
+    map_get := m.get(3)
+    map_has := m.contains(3)
+    map_del := m.delete(3)
+
+    mut map_get_sum Int = 0
+    for i := range map_get {
+        map_get_sum = map_get_sum + i
+    }
+    assert(map_get_sum == 21)
+
+    mut map_flag_sum Int = 0
+    for i := range map_has {
+        map_flag_sum = map_flag_sum + i + 1
+    }
+    for i := range map_del {
+        map_flag_sum = map_flag_sum + i + 1
+    }
+    assert(map_flag_sum == 2)
+
+    s := {8}
+    set_add := s.add(9)
+    set_has := s.contains(9)
+    set_del := s.remove(9)
+
+    mut set_add_sum Int = 0
+    for i := range set_add {
+        set_add_sum = set_add_sum + i + 1
+    }
+    assert(set_add_sum == 0)
+
+    mut set_flag_sum Int = 0
+    for i := range set_has {
+        set_flag_sum = set_flag_sum + i + 1
+    }
+    for i := range set_del {
+        set_flag_sum = set_flag_sum + i + 1
+    }
+    assert(set_flag_sum == 2)
+}
+
+@test
+fn for_range_int_break_and_continue_mix() {
+    mut sum Int = 0
+    mut count Int = 0
+    for i := range 20 {
+        if i == 15 {
+            break
+        }
+        if i % 2 == 0 {
+            continue
+        }
+        sum = sum + i
+        count = count + 1
+    }
+    assert(sum == 49)
+    assert(count == 7)
+}
+
+@test
+fn for_range_array_break_immediately_no_accumulation() {
+    values := [9, 8, 7]
+    mut sum Int = 0
+    mut ticks Int = 0
+    for i, v := range values {
+        if i == 0 {
+            break
+        }
+        sum = sum + i + v
+        ticks = ticks + 1
+    }
+    assert(sum == 0)
+    assert(ticks == 0)
+}
+
+@test
+fn for_range_array_single_element() {
+    values := [42]
+    mut weighted Int = 0
+    for i, v := range values {
+        weighted = weighted + i + v
+    }
+    assert(weighted == 42)
+}
+
+@test
+fn for_range_array_continue_filters_values() {
+    values := [3, 4, 5, 6, 7, 8]
+    mut sum Int = 0
+    mut taken Int = 0
+    for i, v := range values {
+        if i % 2 == 0 {
+            continue
+        }
+        sum = sum + v
+        taken = taken + 1
+    }
+    assert(sum == 18)
+    assert(taken == 3)
+}
+
+@test
+fn nested_count_and_range_int() {
+    mut total Int = 0
+    for 3 {
+        for i := range 5 {
+            total = total + i
+        }
+    }
+    assert(total == 30)
+}
+
+@test
+fn nested_condition_and_range_array() {
+    values := [2, 4, 6, 8]
+    mut round Int = 0
+    mut acc Int = 0
+    for round < 3 {
+        round = round + 1
+        for i, v := range values {
+            if i == 2 {
+                continue
+            }
+            acc = acc + v + round
+        }
+    }
+    assert(round == 3)
+    assert(acc == 60)
+}
+
+@test
+fn long_mixed_loop_scenario_regression_guard() {
+    data := [1, 3, 5, 7, 9, 11, 13, 15]
+    mut i Int = 0
+    mut even_index_sum Int = 0
+    mut odd_index_sum Int = 0
+    mut rounds Int = 0
+
+    for rounds < 4 {
+        rounds = rounds + 1
+
+        for i := range 12 {
+            if i == 10 {
+                break
+            }
+            if i % 2 == 0 {
+                even_index_sum = even_index_sum + i + rounds
+                continue
+            }
+            odd_index_sum = odd_index_sum + i
+        }
+
+        for idx, v := range data {
+            if idx == 7 {
+                break
+            }
+            if v % 3 == 0 {
+                continue
+            }
+            even_index_sum = even_index_sum + idx
+            odd_index_sum = odd_index_sum + v
+        }
+    }
+
+    assert(rounds == 4)
+    assert(even_index_sum == 194)
+    assert(odd_index_sum == 248)
+}
+
+@test
+fn for_range_array_continue_multiple_paths_progresses_index() {
+    values := [10, 11, 12, 13, 14, 15, 16]
+    mut visits Int = 0
+    mut kept Int = 0
+
+    for i, v := range values {
+        visits = visits + 1
+
+        if i < 2 {
+            continue
+        }
+
+        if i % 2 == 0 {
+            continue
+        }
+
+        kept = kept + v
+    }
+
+    assert(visits == 7)
+    assert(kept == 28)
+}
+
+@test
+fn for_range_int_continue_multiple_paths_progresses_index() {
+    mut visits Int = 0
+    mut checksum Int = 0
+
+    for i := range 12 {
+        visits = visits + 1
+
+        if i < 3 {
+            continue
+        }
+
+        if i % 3 == 0 {
+            continue
+        }
+
+        checksum = checksum + i
+    }
+
+    assert(visits == 12)
+    assert(checksum == 45)
+}

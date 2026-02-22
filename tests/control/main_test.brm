@@ -1,0 +1,47 @@
+@test
+fn test_defer_lifo_order_on_return() {
+    ch := Channel<Int>.new(10)
+
+    got := emit_defer_lifo_on_return(ch)
+    assert(got == 99)
+
+    mut first Int = 0
+    mut second Int = 0
+    mut count Int = 0
+
+    for count < 2 {
+        wait {
+            val := << ch => {
+                if count == 0 {
+                    first = val
+                } else {
+                    second = val
+                }
+                count = count + 1
+            }
+        }
+    }
+
+    assert(first == 2)
+    assert(second == 1)
+}
+
+@test
+fn test_defer_runs_on_throw_before_catch() {
+    ch := Channel<Int>.new(10)
+
+    got := emit_defer_on_throw(ch) catch {
+        assert(err != 0)
+        instead -1
+    }
+    assert(got == -1)
+
+    mut observed Int = 0
+    wait {
+        val := << ch => {
+            observed = val
+        }
+    }
+
+    assert(observed == 77)
+}

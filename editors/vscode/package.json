@@ -1,0 +1,158 @@
+{
+  "name": "breom-lang",
+  "displayName": "Breom Language",
+  "description": "Language support for Breom",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ohxorud-dev/breom"
+  },
+  "version": "0.1.0",
+  "publisher": "ohxorud-dev",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:breom",
+    "onCommand:breom.runFile",
+    "onCommand:breom.runProject"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "breom",
+        "aliases": [
+          "Breom",
+          "breom"
+        ],
+        "extensions": [
+          ".brm",
+          ".breom"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "icon.svg",
+          "dark": "icon.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "breom",
+        "scopeName": "source.breom",
+        "path": "./syntaxes/breom.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "breom.runFile",
+        "title": "Breom: Run Current File",
+        "category": "Breom",
+        "icon": "$(play)"
+      },
+      {
+        "command": "breom.runProject",
+        "title": "Breom: Run Project",
+        "category": "Breom",
+        "icon": "$(play-circle)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "breom.runFile",
+          "when": "breom.hasMainFunction"
+        },
+        {
+          "command": "breom.runProject"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "breom.runFile",
+          "when": "editorLangId == breom && breom.hasMainFunction",
+          "group": "navigation@1"
+        },
+        {
+          "command": "breom.runProject",
+          "when": "editorLangId == breom",
+          "group": "navigation@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "breom.runFile",
+          "when": "resourceExtname == '.brm' && breom.hasMainFunction",
+          "group": "navigation@99"
+        },
+        {
+          "command": "breom.runProject",
+          "when": "editorLangId == breom",
+          "group": "navigation@100"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "breom.runFile",
+          "when": "resourceExtname == '.brm'",
+          "group": "navigation@99"
+        },
+        {
+          "command": "breom.runProject",
+          "when": "resourceFilename == 'project.breom' || resourceExtname == '.brm'",
+          "group": "navigation@100"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "Breom",
+      "properties": {
+        "breom.serverPath": {
+          "type": "string",
+          "default": "breom",
+          "description": "Path to the Breom language server executable"
+        },
+        "breom.cliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional explicit path to Breom CLI. Empty uses BREOM_HOME/bin/breom (required)"
+        },
+        "breom.home": {
+          "type": "string",
+          "default": "",
+          "description": "Breom home directory (used as BREOM_HOME for run commands)"
+        },
+        "breom.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.22.0",
+    "typescript": "^5.9.3"
+  }
+}

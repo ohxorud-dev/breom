@@ -1,0 +1,14 @@
+fn main() Int {
+    mut checksum Int = 0
+
+    for outer := range 300 {
+        mut row Int = 0
+        for inner := range 4000 {
+            row = row + (((outer + 1) * (inner + 3)) % 97)
+        }
+        checksum = checksum + row
+    }
+
+    println(checksum as String)
+    return 0
+}

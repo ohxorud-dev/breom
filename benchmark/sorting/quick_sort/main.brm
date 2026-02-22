@@ -1,0 +1,67 @@
+fn main() Int {
+    values := [0]
+    for i := range 3200 {
+        values.push((i * 29 + 13) % 20000)
+    }
+
+    n := values.len()
+    if n > 1 {
+        leftStack := [0]
+        rightStack := [0]
+        for i := range n {
+            if i == 0 {
+                continue
+            }
+            leftStack.push(0)
+            rightStack.push(0)
+        }
+
+        mut top Int = 0
+        leftStack[0] = 0
+        rightStack[0] = n - 1
+
+        for top >= 0 {
+            lo := leftStack[top]
+            hi := rightStack[top]
+            top = top - 1
+
+            pivot := values[hi]
+            mut i Int = lo - 1
+            mut j Int = lo
+            for j < hi {
+                if values[j] <= pivot {
+                    i = i + 1
+                    tmp := values[i]
+                    values[i] = values[j]
+                    values[j] = tmp
+                }
+                j = j + 1
+            }
+
+            p := i + 1
+            tmp := values[p]
+            values[p] = values[hi]
+            values[hi] = tmp
+
+            if p - 1 > lo {
+                top = top + 1
+                leftStack[top] = lo
+                rightStack[top] = p - 1
+            }
+
+            if p + 1 < hi {
+                top = top + 1
+                leftStack[top] = p + 1
+                rightStack[top] = hi
+            }
+        }
+    }
+
+    mut checksum Int = 0
+    for i := range 128 {
+        checksum = checksum + values[i]
+    }
+
+    println(checksum as String)
+    return 0
+}

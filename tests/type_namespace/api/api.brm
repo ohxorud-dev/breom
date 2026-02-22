@@ -1,0 +1,23 @@
+struct Response {
+    pub code Int
+
+    new(code Int) Response {
+        return Response { code: code }
+    }
+
+    fn kind() Int {
+        return 2
+    }
+}
+
+pub fn make_response(code Int) Response {
+    return new Response(code)
+}
+
+pub fn response_kind(r Response) Int {
+    return r.kind()
+}
+
+pub fn code_of(r Response) Int {
+    return r.code
+}

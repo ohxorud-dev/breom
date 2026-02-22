@@ -1,0 +1,32 @@
+@test
+fn tuple_define_explictly() {
+    tuple := (1, 2, 3)
+    assert(tuple[0] == 1)
+    assert(tuple[1] == 2)
+    assert(tuple[2] == 3)
+}
+
+@test
+fn tuple_literal_allocates_value() {
+    tuple := (1, 2, 3)
+    assert(tuple[0] == 1)
+    assert(tuple[1] == 2)
+    assert(tuple[2] == 3)
+}
+
+@test
+fn tuple_variable_reassignment() {
+    mut tuple Tuple[Int, Int] = (10, 20)
+    tuple = (30, 40)
+    assert(tuple[0] == 30)
+    assert(tuple[1] == 40)
+}
+
+@test
+fn tuple_inside_array_collection() {
+    tuples := [(1, 2), (3, 4)]
+    assert(tuples[0][0] == 1)
+    assert(tuples[0][1] == 2)
+    assert(tuples[1][0] == 3)
+    assert(tuples[1][1] == 4)
+}

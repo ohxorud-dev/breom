@@ -1,0 +1,14 @@
+fn emit_defer_lifo_on_return(ch Channel<Int>) Int {
+    defer ch << 1
+    defer ch << 2
+    return 99
+}
+
+fn emit_defer_on_throw(ch Channel<Int>) Int throws {
+    defer ch << 77
+    throw new Error("boom")
+}
+
+fn main() Int {
+    return 0
+}

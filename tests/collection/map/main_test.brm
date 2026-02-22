@@ -1,0 +1,120 @@
+@test
+fn map_basic_ops() {
+    m := (1: 10, 2: 20, 3: 30)
+    assert(m.len() == 3)
+    assert(m.get(1) == 10)
+    assert(m.get(2) == 20)
+    assert(m.contains(3))
+    assert(m.contains(999) == false)
+
+    m.set(2, 200)
+    assert(m.len() == 3)
+    assert(m.get(2) == 200)
+
+    m.set(4, 40)
+    assert(m.len() == 4)
+    assert(m.contains(4))
+
+    assert(m.delete(4) == true)
+    assert(m.contains(4) == false)
+    assert(m.len() == 3)
+
+    assert(m.delete(404) == false)
+    assert(m.len() == 3)
+    assert(m.get(404) == 0)
+}
+
+@test
+fn map_duplicate_key_and_collision_chain() {
+    dup := (5: 1, 5: 2)
+    assert(dup.len() == 1)
+    assert(dup.get(5) == 2)
+
+    coll := (0: 100, 30: 300, 79: 790)
+    assert(coll.contains(30))
+    assert(coll.contains(79))
+    assert(coll.delete(0) == true)
+    assert(coll.contains(30))
+    assert(coll.get(30) == 300)
+    assert(coll.contains(79))
+    assert(coll.get(79) == 790)
+
+    coll2 := (0: 1, 30: 2, 79: 3)
+    assert(coll2.delete(30) == true)
+    assert(coll2.contains(79))
+    assert(coll2.get(79) == 3)
+}
+
+@test
+fn map_capacity_growth() {
+    cap := (0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7)
+    cap.set(8, 8)
+    assert(cap.len() == 9)
+    assert(cap.contains(8))
+    assert(cap.get(8) == 8)
+}
+
+@test
+fn map_delete_all_and_reinsert() {
+    m := (10: 100, 11: 110, 12: 120)
+    assert(m.len() == 3)
+
+    assert(m.delete(10) == true)
+    assert(m.delete(11) == true)
+    assert(m.delete(12) == true)
+    assert(m.len() == 0)
+    assert(m.contains(10) == false)
+
+    m.set(10, 1000)
+    m.set(11, 1100)
+    assert(m.len() == 2)
+    assert(m.get(10) == 1000)
+    assert(m.get(11) == 1100)
+}
+
+@test
+fn map_negative_and_zero_keys() {
+    m := (0: 7, -1: 8, -2: 9)
+    assert(m.len() == 3)
+    assert(m.get(0) == 7)
+    assert(m.get(-1) == 8)
+    assert(m.get(-2) == 9)
+
+    m.set(-1, 80)
+    assert(m.get(-1) == 80)
+    assert(m.delete(-2) == true)
+    assert(m.contains(-2) == false)
+}
+
+@test
+fn map_tombstone_reuse_under_churn() {
+    m := (0: 0, 30: 30, 79: 79, 145: 145)
+    assert(m.len() == 4)
+
+    assert(m.delete(30) == true)
+    assert(m.delete(79) == true)
+    assert(m.len() == 2)
+
+    m.set(230, 230)
+    m.set(311, 311)
+    assert(m.len() == 4)
+    assert(m.get(230) == 230)
+    assert(m.get(311) == 311)
+    assert(m.get(0) == 0)
+    assert(m.get(145) == 145)
+}
+
+@test
+fn map_many_updates_keep_size_stable() {
+    m := (1: 1, 2: 2, 3: 3)
+    mut i Int = 0
+    for i < 50 {
+        m.set(2, i)
+        i = i + 1
+    }
+
+    assert(m.len() == 3)
+    assert(m.get(2) == 49)
+    assert(m.get(1) == 1)
+    assert(m.get(3) == 3)
+}

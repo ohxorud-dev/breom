@@ -1,0 +1,58 @@
+
+<idea-plugin>
+    <id>org.ohxorud.breom.jetbrains</id>
+    <name>Breom</name>
+    <vendor>ohxorud-dev</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable parentId="languages" displayName="Breom" id="org.ohxorud.breom.jetbrains.settings" instance="org.ohxorud.breom.jetbrains.settings.BreomSettingsConfigurable"/>
+        <fileType name="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomFileType" fieldName="INSTANCE" language="Breom" extensions="brm"/>
+        <fileType name="Breom Project Manifest" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomProjectFileType" fieldName="INSTANCE" language="BreomProject" fileNames="project.breom"/>
+        <fileType name="Breom Lockfile" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomLockFileType" fieldName="INSTANCE" language="BreomLock" fileNames="lock.breom"/>
+        <lang.parserDefinition language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomParserDefinition"/>
+        <lang.parserDefinition language="BreomProject" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomProjectParserDefinition"/>
+        <lang.parserDefinition language="BreomLock" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomLockParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory language="BreomProject" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomProjectSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory language="BreomLock" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomLockSyntaxHighlighterFactory"/>
+        <lang.commenter language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomCommenter"/>
+        <lang.findUsagesProvider language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomFindUsagesProvider"/>
+        <lang.braceMatcher language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomPairedBraceMatcher"/>
+        <completion.contributor language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomCompletionContributor"/>
+        <annotator language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomAnnotator"/>
+        <annotator language="BreomProject" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomProjectAnnotator"/>
+        <annotator language="BreomLock" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomLockAnnotator"/>
+        <lang.inspectionSuppressor language="BreomProject" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomMetaInspectionSuppressor"/>
+        <lang.inspectionSuppressor language="BreomLock" implementationClass="org.ohxorud.breom.jetbrains.meta.BreomMetaInspectionSuppressor"/>
+        <lang.psiStructureViewFactory language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomStructureViewFactory"/>
+        <lang.quoteHandler language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomQuoteHandler"/>
+        <lang.foldingBuilder language="Breom" implementationClass="org.ohxorud.breom.jetbrains.BreomFoldingBuilder"/>
+        <codeInsight.lineMarkerProvider language="Breom" implementationClass="org.ohxorud.breom.jetbrains.run.BreomRunLineMarkerContributor"/>
+        <psi.referenceContributor language="Breom" implementation="org.ohxorud.breom.jetbrains.psi.BreomModulePathReferenceContributor"/>
+        <fileBasedIndex implementation="org.ohxorud.breom.jetbrains.index.BreomModulePathIndex"/>
+        <fileBasedIndex implementation="org.ohxorud.breom.jetbrains.index.BreomSymbolIndex"/>
+        <newProjectWizard.languageGenerator implementation="org.ohxorud.breom.jetbrains.BreomLanguageGeneratorNewProjectWizard"/>
+        <configurationType implementation="org.ohxorud.breom.jetbrains.run.BreomRunConfigurationType"/>
+    </extensions>
+
+    <actions>
+        <action id="Breom.RunFile"
+                class="org.ohxorud.breom.jetbrains.actions.BreomRunFileAction"
+                text="Run Breom File"
+                description="Run current Breom file"
+                icon="/icon.svg">
+            <add-to-group group-id="RunMenu" anchor="last"/>
+        </action>
+        <action id="Breom.RunProject"
+                class="org.ohxorud.breom.jetbrains.actions.BreomRunProjectAction"
+                text="Run Breom Project"
+                description="Run Breom project"
+                icon="/icon.svg">
+            <add-to-group group-id="RunMenu" anchor="last"/>
+        </action>
+    </actions>
+
+    <applicationService serviceImplementation="org.ohxorud.breom.jetbrains.settings.BreomSettingsService"/>
+</idea-plugin>

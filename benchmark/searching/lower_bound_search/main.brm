@@ -1,0 +1,39 @@
+fn search_index(values []Int, target Int) Int {
+    mut lo Int = 0
+    mut hi Int = values.len()
+
+    for lo < hi {
+        mid := (lo + hi) / 2
+        v := values[mid]
+        if v < target {
+            lo = mid + 1
+        } else {
+            hi = mid
+        }
+    }
+
+    if lo < values.len() {
+        if values[lo] == target {
+            return lo
+        }
+    }
+
+    return -1
+}
+
+fn main() Int {
+    values := [0]
+    for i := range 50000 {
+        values.push(i * 2)
+    }
+
+    target := 49991 * 2
+    mut checksum Int = 0
+    for i := range 420000 {
+        idx := search_index(values, target)
+        checksum = checksum + (idx % 97) + (i % 5)
+    }
+
+    println(checksum as String)
+    return 0
+}

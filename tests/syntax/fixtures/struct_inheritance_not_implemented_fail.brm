@@ -1,0 +1,11 @@
+struct Parent {
+    x Int
+}
+
+struct Child: Parent {
+    y Int
+}
+
+fn main() Int {
+    return 0
+}

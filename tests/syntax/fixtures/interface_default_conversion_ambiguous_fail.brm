@@ -1,0 +1,19 @@
+interface AmbiguousA {
+    to String {
+        return "A"
+    }
+}
+
+interface AmbiguousB {
+    to String {
+        return "B"
+    }
+}
+
+struct AmbiguousValue: AmbiguousA, AmbiguousB {}
+
+fn main() Int {
+    value := AmbiguousValue {}
+    print(value)
+    return 0
+}

@@ -1,0 +1,149 @@
+import net.udp
+import net.tcp
+import net.http
+
+@test
+fn bind_and_send_loopback() {
+    mut port Int = 18081
+    res := udp.bind(port)
+    mut retries Int = 0
+    for res == 0 && retries < 10 {
+        port = port + 1
+        res = udp.bind(port)
+        retries = retries + 1
+    }
+    assert(res != 0)
+
+    socket := res.socket
+    rx := res.rx
+
+    bytes := udp.send(socket, "127.0.0.1", port, "hello")
+    assert(bytes > 0)
+
+    mut received String = ""
+    wait {
+        msg := << rx => {
+            received = msg
+        }
+    }
+
+    assert(received == "hello")
+}
+
+@test
+fn bind_same_port_conflict() {
+    mut port Int = 18181
+    first := udp.bind(port)
+    mut retries Int = 0
+    for first == 0 && retries < 10 {
+        port = port + 1
+        first = udp.bind(port)
+        retries = retries + 1
+    }
+    assert(first != 0)
+
+    second := udp.bind(port)
+    assert(second == 0)
+}
+
+@test
+fn tcp_wait_packet_field_access() {
+    mut port Int = 18281
+    server := tcp.bind(port)
+    mut retries Int = 0
+    for server == 0 && retries < 10 {
+        port = port + 1
+        server = tcp.bind(port)
+        retries = retries + 1
+    }
+    assert(server != 0)
+
+    client := tcp.connect("127.0.0.1", port)
+    assert(client != 0)
+
+    sent := tcp.send(client, 0, "ping")
+    assert(sent > 0)
+
+    mut payload String = ""
+    mut conn Int = 0
+    wait {
+        packet := <<server.rx => {
+            payload = packet.data
+            conn = packet.conn
+        }
+    }
+
+    assert(payload == "ping")
+    assert(conn > 0)
+}
+
+@test
+fn http_get_parses_status_and_body() {
+    mut port Int = 18381
+
+    spawn http.listen(port, (req http.Request) http.Response -> {
+        return http.Response {
+            status: 201,
+            headers: "X-Test: net\r\n",
+            body: "ok"
+        }
+    })
+
+    mut resp http.Response = http.Response {
+        status: 500,
+        headers: "",
+        body: ""
+    }
+    mut tries Int = 0
+    for tries < 20 {
+        resp = http.get("127.0.0.1", port, "/") instead http.Response {
+            status: 500,
+            headers: "",
+            body: ""
+        }
+        if resp.status == 201 && resp.body == "ok" {
+            break
+        }
+        sleep(10)
+        tries = tries + 1
+    }
+
+    assert(resp.status == 201)
+    assert(resp.body == "ok")
+    assert(len(resp.headers) >= 11)
+}
+
+@test
+fn http_get_after_spawn_is_stable() {
+    mut port Int = 18382
+
+    spawn http.listen(port, (req http.Request) http.Response -> {
+        return http.Response {
+            status: 200,
+            headers: "",
+            body: "ready"
+        }
+    })
+
+    mut resp http.Response = http.Response {
+        status: 500,
+        headers: "",
+        body: ""
+    }
+    mut tries Int = 0
+    for tries < 20 {
+        resp = http.get("127.0.0.1", port, "/") instead http.Response {
+            status: 500,
+            headers: "",
+            body: ""
+        }
+        if resp.status == 200 && resp.body == "ready" {
+            break
+        }
+        sleep(10)
+        tries = tries + 1
+    }
+
+    assert(resp.status == 200)
+    assert(resp.body == "ready")
+}

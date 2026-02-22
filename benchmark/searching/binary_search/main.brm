@@ -1,0 +1,38 @@
+fn binary_search(values []Int, target Int) Int {
+    mut lo Int = 0
+    mut hi Int = values.len() - 1
+
+    for lo <= hi {
+        mid := (lo + hi) / 2
+        mid_val := values[mid]
+
+        if mid_val == target {
+            return mid
+        }
+
+        if mid_val < target {
+            lo = mid + 1
+        } else {
+            hi = mid - 1
+        }
+    }
+
+    return -1
+}
+
+fn main() Int {
+    values := [0]
+    for i := range 40000 {
+        values.push(i * 2)
+    }
+
+    target := 39993 * 2
+    mut checksum Int = 0
+    for i := range 500000 {
+        idx := binary_search(values, target)
+        checksum = checksum + (idx % 97) + (i % 3)
+    }
+
+    println(checksum as String)
+    return 0
+}

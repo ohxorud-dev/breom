@@ -1,0 +1,29 @@
+import file.io
+
+fn line_length_sum(path String) Int {
+    s := io.scanner(path)
+    mut total Int = 0
+
+    for {
+        line_len := s.next_line_len()
+        if line_len < 0 {
+            break
+        }
+        total = total + line_len
+    }
+
+    _ := s.close()
+    return total
+}
+
+fn main() Int {
+    path := ".tmp/io_fixture.txt"
+
+    mut checksum Int = 0
+    for i := range 12 {
+        checksum = checksum + line_length_sum(path) + (i % 4)
+    }
+
+    println(checksum as String)
+    return 0
+}

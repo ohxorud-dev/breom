@@ -1,0 +1,29 @@
+import file.io
+
+fn count_lines(path String) Int {
+    s := io.scanner(path)
+    mut count Int = 0
+
+    for {
+        line_len := s.next_line_len()
+        if line_len < 0 {
+            break
+        }
+        count = count + 1
+    }
+
+    _ := s.close()
+    return count
+}
+
+fn main() Int {
+    path := ".tmp/io_fixture.txt"
+
+    mut checksum Int = 0
+    for i := range 15 {
+        checksum = checksum + count_lines(path) + (i % 3)
+    }
+
+    println(checksum as String)
+    return 0
+}

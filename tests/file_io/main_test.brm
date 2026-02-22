@@ -1,0 +1,117 @@
+import file.io
+
+@test
+fn file_roundtrip_and_append() {
+    dir := "./tests/.tmp/file_io_stdlib"
+    path := "./tests/.tmp/file_io_stdlib/sample.txt"
+
+    if io.exists(path) {
+        assert(io.remove(path))
+    }
+    if io.exists(dir) {
+        assert(io.remove(dir))
+    }
+
+    assert(io.mkdir(dir))
+    assert(io.exists(dir))
+
+    written := io.write(path, "hello")
+    assert(written == 5)
+    assert(io.exists(path))
+
+    appended := io.append(path, " world")
+    assert(appended == 6)
+
+    content := io.read(path)
+    assert(content == "hello world")
+
+    assert(io.remove(path))
+    assert(io.exists(path) == false)
+    assert(io.remove(dir))
+}
+
+@test
+fn remove_missing_path_returns_false() {
+    missing := "./tests/.tmp/file_io_stdlib/missing.txt"
+
+    if io.exists(missing) {
+        assert(io.remove(missing))
+    }
+
+    assert(io.remove(missing) == false)
+}
+
+@test
+fn reader_reads_full_content() {
+    dir := "./tests/.tmp/file_io_stdlib"
+    path := "./tests/.tmp/file_io_stdlib/reader.txt"
+
+    if io.exists(path) {
+        assert(io.remove(path))
+    }
+    if io.exists(dir) == false {
+        assert(io.mkdir(dir))
+    }
+
+    assert(io.write(path, "line1\nline2") == 11)
+
+    r := io.reader(path)
+    all String = r.read_all()
+    assert(all == "line1\nline2")
+    assert(r.close())
+
+    assert(io.remove(path))
+    assert(io.remove(dir))
+}
+
+@test
+fn scanner_reads_lines_in_order() {
+    dir := "./tests/.tmp/file_io_stdlib"
+    path := "./tests/.tmp/file_io_stdlib/scanner.txt"
+
+    if io.exists(path) {
+        assert(io.remove(path))
+    }
+    if io.exists(dir) == false {
+        assert(io.mkdir(dir))
+    }
+
+    assert(io.write(path, "alpha\nbeta\ngamma") == 16)
+
+    s := io.scanner(path)
+    assert(s.has_next())
+
+    first String = s.next_line()
+    second String = s.next_line()
+    third String = s.next_line()
+
+    assert(first == "alpha")
+    assert(second == "beta")
+    assert(third == "gamma")
+    assert(s.has_next() == false)
+    assert(s.close())
+
+    assert(io.remove(path))
+    assert(io.remove(dir))
+}
+
+@test
+fn read_byte_sum_matches_expected_ascii_values() {
+    dir := "./tests/.tmp/file_io_stdlib"
+    path := "./tests/.tmp/file_io_stdlib/byte_sum.txt"
+
+    if io.exists(path) {
+        assert(io.remove(path))
+    }
+    if io.exists(dir) == false {
+        assert(io.mkdir(dir))
+    }
+
+    assert(io.write(path, "ABC\n") == 4)
+
+    checksum := io.read_byte_sum(path)
+    assert(checksum == 208)
+
+    assert(io.remove(path))
+    assert(io.remove(dir))
+}

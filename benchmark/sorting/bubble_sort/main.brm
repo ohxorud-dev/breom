@@ -1,0 +1,26 @@
+fn main() Int {
+    values := [0]
+    for i := range 2200 {
+        values.push((i * 17 + 23) % 10000)
+    }
+
+    n := values.len()
+    for i := range n {
+        limit := n - i - 1
+        for j := range limit {
+            if values[j] > values[j + 1] {
+                tmp := values[j]
+                values[j] = values[j + 1]
+                values[j + 1] = tmp
+            }
+        }
+    }
+
+    mut checksum Int = 0
+    for i := range 128 {
+        checksum = checksum + values[i]
+    }
+
+    println(checksum as String)
+    return 0
+}

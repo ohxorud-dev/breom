@@ -1,0 +1,18 @@
+fn main() Int {
+    values := [0]
+    for i := range 200000 {
+        values.push((i * 9 + 5) % 1000)
+    }
+
+    mut checksum Int = 0
+    for round := range 40 {
+        mut local Int = 0
+        for _, v := range values {
+            local = local + v + (round % 3)
+        }
+        checksum = checksum + local
+    }
+
+    println(checksum as String)
+    return 0
+}

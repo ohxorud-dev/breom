@@ -1,0 +1,7 @@
+fn static_array_sum(arr [4]Int) Int {
+    return arr[0] + arr[1] + arr[2] + arr[3]
+}
+
+fn static_array_from_literal() [4]Int {
+    return [9, 10]
+}

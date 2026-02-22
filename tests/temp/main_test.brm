@@ -1,0 +1,40 @@
+@test
+fn static_array_return_survives_function_scope() {
+    arr := make_static_array()
+
+    for 1000 {
+        corrupt_stack()
+    }
+
+    assert(arr[0] == 11)
+    assert(arr[1] == 22)
+    assert(arr[2] == 33)
+}
+
+@test
+fn static_array_passed_between_functions_keeps_data() {
+    arr := pass_through([7, 8, 9])
+
+    for 1000 {
+        corrupt_stack()
+    }
+
+    assert(arr[0] == 7)
+    assert(arr[1] == 8)
+    assert(arr[2] == 9)
+}
+
+@test
+fn static_array_padding_survives_function_scope() {
+    arr := make_padded_static_array()
+
+    for 1000 {
+        corrupt_stack()
+    }
+
+    assert(arr[0] == 1)
+    assert(arr[1] == 2)
+    assert(arr[2] == 3)
+    assert(arr[3] == 0)
+    assert(arr[4] == 0)
+}

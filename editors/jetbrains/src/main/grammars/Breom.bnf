@@ -1,0 +1,364 @@
+{
+  parserClass="org.ohxorud.breom.jetbrains.parser.BreomParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Breom"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.ohxorud.breom.jetbrains.psi"
+  psiImplPackage="org.ohxorud.breom.jetbrains.psi.impl"
+
+  elementTypeHolderClass="org.ohxorud.breom.jetbrains.psi.BreomTypes"
+  elementTypeClass="org.ohxorud.breom.jetbrains.psi.BreomElementType"
+  tokenTypeClass="org.ohxorud.breom.jetbrains.psi.BreomTokenType"
+
+  tokens = [
+
+    PACKAGE_KEYWORD      = 'package'
+    BREOM_KEYWORD        = 'breom'
+    ENTRYPOINT_KEYWORD   = 'entrypoint'
+    DEP_KEYWORD          = 'dep'
+    IMPORT_KEYWORD       = 'import'
+    AS_KEYWORD           = 'as'
+    PUB_KEYWORD          = 'pub'
+    MUT_KEYWORD          = 'mut'
+    DEFINE_KEYWORD       = 'define'
+    FN_KEYWORD           = 'fn'
+    RETURN_KEYWORD       = 'return'
+    DEFER_KEYWORD        = 'defer'
+    FOR_KEYWORD          = 'for'
+    RANGE_KEYWORD        = 'range'
+    IF_KEYWORD           = 'if'
+    ELSE_KEYWORD         = 'else'
+    STRUCT_KEYWORD       = 'struct'
+    INTERFACE_KEYWORD    = 'interface'
+    ENUM_KEYWORD         = 'enum'
+    ATTRIBUTE_KEYWORD    = 'attribute'
+    MATCH_KEYWORD        = 'match'
+    SPAWN_KEYWORD        = 'spawn'
+    WAIT_KEYWORD         = 'wait'
+    DEFAULT_KEYWORD      = 'default'
+    TIMEOUT_KEYWORD      = 'timeout'
+    TO_KEYWORD           = 'to'
+    POINT_KEYWORD        = 'point'
+    TEST_KEYWORD         = 'test'
+    NEW_KEYWORD          = 'new'
+    OP_KEYWORD           = 'op'
+    THROW_KEYWORD        = 'throw'
+    THROWS_KEYWORD       = 'throws'
+    CATCH_KEYWORD        = 'catch'
+    INSTEAD_KEYWORD      = 'instead'
+    VOID_KEYWORD         = 'void'
+    TRUE_KEYWORD         = 'true'
+    FALSE_KEYWORD        = 'false'
+    SHL_KEYWORD          = 'shl'
+    SHR_KEYWORD          = 'shr'
+    BREAK_KEYWORD        = 'break'
+    CONTINUE_KEYWORD     = 'continue'
+    IN_KEYWORD           = 'in'
+    TUPLE_KEYWORD        = 'Tuple'
+    CHAN_KEYWORD         = 'chan'
+    SELF_KEYWORD         = 'self'
+
+
+    PLUS                 = '+'
+    MINUS                = '-'
+    STAR                 = '*'
+    SLASH                = '/'
+    PERCENT              = '%'
+    EQ                   = '='
+    EQEQ                 = '=='
+    NEQ                  = '!='
+    LT                   = '<'
+    GT                   = '>'
+    LTEQ                 = '<='
+    GTEQ                 = '>='
+    ANDAND               = '&&'
+    OROR                 = '||'
+    NOT                  = '!'
+    AND                  = '&'
+    OR                   = '|'
+    XOR                  = '^'
+    TILDE                = '~'
+    PLUSEQ               = '+='
+    MINUSEQ              = '-='
+    STAREQ               = '*='
+    SLASHEQ              = '/='
+    PERCENTEQ            = '%='
+    ANDEQ                = '&='
+    OREQ                 = '|='
+    XOREQ                = '^='
+    ARROW                = '->'
+    FATARROW             = '=>'
+    COLONCOLON           = '::'
+    COLONEQ              = ':='
+    QUESTION             = '?'
+    LSHIFT               = '<<'
+
+
+    LPAREN               = '('
+    RPAREN               = ')'
+    LBRACE               = '{'
+    RBRACE               = '}'
+    LBRACKET             = '['
+    RBRACKET             = ']'
+    COMMA                = ','
+    DOT                  = '.'
+    COLON                = ':'
+    SEMICOLON            = ';'
+    AT                   = '@'
+    UNDERSCORE           = '_'
+
+
+    IDENTIFIER           = 'regexp:[a-zA-Z_][a-zA-Z0-9_]*'
+    TYPE_IDENTIFIER      = 'regexp:[A-Z][a-zA-Z0-9]*'
+    INTEGER_LITERAL      = 'regexp:(0[xX][0-9a-fA-F_]+|0[oO][0-7_]+|0[bB][01_]+|[0-9][0-9_]*)'
+    FLOAT_LITERAL        = 'regexp:[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+'
+    STRING_LITERAL       = 'regexp:"([^"\\]|\\.)*"'
+    MULTILINE_STRING     = 'regexp:"""(.|\n)*?"""'
+    FSTRING_LITERAL      = 'regexp:f"([^"\\{]|\\.|\{[^}]*\})*"'
+    CHAR_LITERAL         = "regexp:'([^'\\]|\\.)+'"
+
+
+    LINE_COMMENT         = 'regexp://[^\r\n]*'
+    BLOCK_COMMENT        = 'regexp:/\*([^*]|\*[^/])*\*/'
+  ]
+}
+
+
+breomFile ::= breomDecl? moduleDecl? entrypointDecl? depDecl* dependDecl* topLevelItem*
+
+breomDecl ::= BREOM_KEYWORD semver
+semver ::= INTEGER_LITERAL DOT INTEGER_LITERAL DOT INTEGER_LITERAL
+
+
+moduleDecl ::= PACKAGE_KEYWORD modulePath
+entrypointDecl ::= ENTRYPOINT_KEYWORD filePath
+dependDecl ::= IMPORT_KEYWORD modulePath (AS_KEYWORD IDENTIFIER)?
+depDecl ::= DEP_KEYWORD STRING_LITERAL STRING_LITERAL
+modulePath ::= IDENTIFIER (DOT IDENTIFIER)*
+filePath ::= IDENTIFIER | STRING_LITERAL
+nameIdentifier ::= IDENTIFIER | TYPE_IDENTIFIER
+
+
+topLevelItem ::= defineDecl | structDecl | interfaceDecl | enumDecl | attributeDecl | functionDecl | testDecl | statement
+
+
+defineDecl ::= DEFINE_KEYWORD nameIdentifier typeAnnotation? EQ expression {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+
+}
+
+
+varDecl ::= visibility? mutability? nameIdentifier (
+    COLONEQ expression
+  | typeAnnotation EQ expression
+  ) {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+  methods=[getName setName getNameIdentifier]
+}
+visibility ::= PUB_KEYWORD
+mutability ::= MUT_KEYWORD
+typeAnnotation ::= typeExpr
+
+
+typeExpr ::= functionType | chanType | tupleType | arrayType | dynamicArrayType | genericType | baseType
+baseType ::= TYPE_IDENTIFIER
+genericType ::= baseType LT typeList GT
+typeList ::= typeConstraint (COMMA typeConstraint)*
+typeConstraint ::= typeExpr (COLON constraintList)?
+constraintList ::= typeExpr (COMMA typeExpr)*
+arrayType ::= LBRACKET INTEGER_LITERAL RBRACKET typeExpr
+dynamicArrayType ::= LBRACKET RBRACKET typeExpr
+chanType ::= TYPE_IDENTIFIER LT typeExpr GT
+tupleType ::= TUPLE_KEYWORD LBRACKET typeList RBRACKET
+functionType ::= FN_KEYWORD LPAREN paramTypeList? RPAREN returnTypeSpec?
+paramTypeList ::= typeExpr (COMMA typeExpr)*
+
+
+functionDecl ::= attribute* visibility? FN_KEYWORD nameIdentifier genericParams? LPAREN paramList? RPAREN returnTypeSpec? block {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+  methods=[getName setName getNameIdentifier]
+}
+attribute ::= AT (IDENTIFIER | TEST_KEYWORD) attributeArgs?
+attributeDecl ::= ATTRIBUTE_KEYWORD nameIdentifier attributeDeclParams?
+attributeDeclParams ::= LPAREN attributeParamList? RPAREN
+attributeParamList ::= attributeParam (COMMA attributeParam)*
+attributeParam ::= IDENTIFIER typeExpr
+attributeArgs ::= LPAREN argList RPAREN
+genericParams ::= LT genericParam (COMMA genericParam)* GT
+genericParam ::= nameIdentifier (COLON constraintList)?
+paramList ::= param (COMMA param)*
+param ::= mutability? nameIdentifier typeExpr {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+  methods=[getName setName getNameIdentifier]
+}
+
+
+structDecl ::= visibility? STRUCT_KEYWORD TYPE_IDENTIFIER genericParams? inheritance? structBody {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+  methods=[getName setName getNameIdentifier]
+}
+inheritance ::= COLON typeExpr (COMMA typeExpr)*
+structBody ::= LBRACE structMember* RBRACE
+structMember ::= constructorDecl | defaultDecl | operatorDecl | conversionDecl | methodDecl | fieldDecl
+constructorDecl ::= visibility? NEW_KEYWORD LPAREN paramList? RPAREN returnTypeSpec? block
+defaultDecl ::= visibility? DEFAULT_KEYWORD LPAREN RPAREN block
+operatorDecl ::= visibility? OP_KEYWORD operatorSymbol LPAREN paramList? RPAREN returnTypeSpec? block
+conversionKeyword ::= TO_KEYWORD | AS_KEYWORD
+conversionDecl ::= visibility? conversionKeyword typeExpr block
+operatorSymbol ::= OROR | ANDAND | OR | XOR | AND | EQEQ | NEQ | LTEQ | GTEQ | LT | GT | SHL_KEYWORD | SHR_KEYWORD | PLUS | MINUS | STAR | SLASH | PERCENT
+fieldDecl ::= visibility? POINT_KEYWORD? mutability? nameIdentifier typeExpr {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+  methods=[getName setName getNameIdentifier]
+}
+methodDecl ::= visibility? FN_KEYWORD nameIdentifier genericParams? LPAREN methodParamList? RPAREN returnTypeSpec? block {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+  methods=[getName setName getNameIdentifier]
+}
+methodParamList ::= methodParam (COMMA methodParam)*
+methodParam ::= SELF_KEYWORD | param
+
+interfaceDecl ::= visibility? INTERFACE_KEYWORD TYPE_IDENTIFIER genericParams? interfaceBody {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+  methods=[getName setName getNameIdentifier]
+}
+interfaceBody ::= LBRACE interfaceMember* RBRACE
+interfaceMember ::= defaultMethod | methodSignature | interfaceConversionDefault | interfaceConversionSignature
+methodSignature ::= FN_KEYWORD nameIdentifier genericParams? LPAREN methodParamList? RPAREN returnTypeSpec?
+defaultMethod ::= FN_KEYWORD nameIdentifier genericParams? LPAREN methodParamList? RPAREN returnTypeSpec? block
+interfaceConversionSignature ::= conversionKeyword typeExpr
+interfaceConversionDefault ::= conversionKeyword typeExpr block
+
+enumDecl ::= visibility? ENUM_KEYWORD TYPE_IDENTIFIER genericParams? enumBody {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomNamedElementImpl"
+  implements="org.ohxorud.breom.jetbrains.psi.BreomNamedElement"
+  methods=[getName setName getNameIdentifier]
+}
+enumBody ::= LBRACE enumVariantDecl* RBRACE
+enumVariantDecl ::= nameIdentifier (LPAREN typeExpr (COMMA typeExpr)* RPAREN)?
+
+
+testDecl ::= TEST_KEYWORD STRING_LITERAL block
+
+
+statement ::= returnStmt | throwStmt | deferStmt | forStmt | ifStmt | matchStmt | spawnStmt | waitStmt | breakStmt | continueStmt | insteadStmt | varDecl | assignmentStmt | expressionStmt
+
+returnStmt ::= RETURN_KEYWORD expression?
+throwStmt ::= THROW_KEYWORD expression
+insteadStmt ::= INSTEAD_KEYWORD expression
+deferStmt ::= DEFER_KEYWORD (block | expression)
+breakStmt ::= BREAK_KEYWORD
+continueStmt ::= CONTINUE_KEYWORD
+expressionStmt ::= expression
+
+
+forStmt ::= forRange | forCount | forCondition | forInfinite
+forInfinite ::= FOR_KEYWORD block
+forCondition ::= FOR_KEYWORD expression block
+forCount ::= FOR_KEYWORD INTEGER_LITERAL block
+forRange ::= FOR_KEYWORD nameIdentifier (COMMA nameIdentifier)? COLONEQ RANGE_KEYWORD expression block
+
+
+ifStmt ::= IF_KEYWORD expression block elseClause?
+elseClause ::= ELSE_KEYWORD (ifStmt | block)
+
+
+matchStmt ::= MATCH_KEYWORD expression LBRACE matchArm+ RBRACE
+matchArm ::= pattern FATARROW (block | expression)
+pattern ::= enumPattern | literalPattern | bindingPattern | wildcardPattern
+wildcardPattern ::= UNDERSCORE
+bindingPattern ::= nameIdentifier
+literalPattern ::= literal
+enumPattern ::= nameIdentifier LPAREN patternList? RPAREN
+patternList ::= pattern (COMMA pattern)*
+
+
+spawnStmt ::= SPAWN_KEYWORD (block | expression)
+waitStmt ::= WAIT_KEYWORD LBRACE waitArm+ RBRACE
+waitArm ::= (waitReceive | waitDefault | waitTimeout) FATARROW (block | expression)
+waitReceive ::= nameIdentifier COLONEQ LSHIFT expression
+waitDefault ::= DEFAULT_KEYWORD
+waitTimeout ::= TIMEOUT_KEYWORD LPAREN expression RPAREN
+
+
+assignmentStmt ::= lvalue assignOp expression {
+  pin=2
+}
+lvalue ::= referenceExpression (memberAccess | indexAccess)*
+assignOp ::= EQ | PLUSEQ | MINUSEQ | STAREQ | SLASHEQ | PERCENTEQ | ANDEQ | OREQ | XOREQ
+
+
+expression ::= orExpr (QUESTION expression COLON expression)?
+orExpr ::= andExpr (OROR andExpr)*
+andExpr ::= bitorExpr (ANDAND bitorExpr)*
+bitorExpr ::= bitxorExpr (OR bitxorExpr)*
+bitxorExpr ::= bitandExpr (XOR bitandExpr)*
+bitandExpr ::= eqExpr (AND eqExpr)*
+eqExpr ::= cmpExpr ((EQEQ | NEQ) cmpExpr)*
+cmpExpr ::= shiftExpr ((LT | GT | LTEQ | GTEQ) shiftExpr)*
+shiftExpr ::= addExpr ((SHL_KEYWORD | SHR_KEYWORD) addExpr)*
+addExpr ::= mulExpr ((PLUS | MINUS) mulExpr)*
+mulExpr ::= unaryExpr ((STAR | SLASH | PERCENT) unaryExpr)*
+
+unaryExpr ::= channelReceive | prefixOp unaryExpr | postfixExpr
+prefixOp ::= NOT | MINUS | TILDE
+channelReceive ::= LSHIFT postfixExpr
+
+postfixExpr ::= primaryExpr postfixOp*
+postfixOp ::= callOp | memberAccess | indexAccess | typeCast | errorPropagation | channelSend | catchBlock | insteadFallback
+callOp ::= LPAREN argList? RPAREN
+memberAccess ::= DOT referenceExpression
+indexAccess ::= LBRACKET expression RBRACKET
+typeCast ::= AS_KEYWORD typeExpr
+errorPropagation ::= QUESTION
+channelSend ::= LSHIFT expression
+catchBlock ::= CATCH_KEYWORD block
+insteadFallback ::= INSTEAD_KEYWORD expression
+
+argList ::= expression (COMMA expression)*
+
+
+primaryExpr ::= literal | lambdaExpr | channelNewExpr | newExpr | structLiteral | tupleLiteral | collectionLiteral | groupedExpr | referenceExpression
+referenceExpression ::= nameIdentifier {
+  mixin="org.ohxorud.breom.jetbrains.psi.impl.BreomReferenceElementImpl"
+}
+newExpr ::= NEW_KEYWORD (genericType | baseType) LPAREN argList? RPAREN
+channelNewExpr ::= TYPE_IDENTIFIER LT typeExpr GT DOT NEW_KEYWORD LPAREN argList? RPAREN
+groupedExpr ::= LPAREN expression RPAREN
+
+lambdaExpr ::= LPAREN lambdaParamList? RPAREN ARROW (block | expression)
+lambdaParamList ::= lambdaParam (COMMA lambdaParam)*
+lambdaParam ::= nameIdentifier typeExpr?
+
+structLiteral ::= typeExpr LBRACE fieldInitList? RBRACE
+fieldInitList ::= fieldInit (COMMA fieldInit)* COMMA?
+fieldInit ::= nameIdentifier COLON expression
+
+tupleLiteral ::= LPAREN expression COMMA expression (COMMA expression)* COMMA? RPAREN
+
+collectionLiteral ::= arrayLiteral | mapLiteral | setLiteral
+arrayLiteral ::= LBRACKET (arrayRepeat | arrayElements)? COMMA? RBRACKET
+arrayRepeat ::= expression SEMICOLON expression
+arrayElements ::= expression (COMMA expression)*
+mapLiteral ::= LPAREN mapEntry (COMMA mapEntry)* COMMA? RPAREN
+mapEntry ::= expression COLON expression
+setLiteral ::= LBRACE (expression (COMMA expression)*)? COMMA? RBRACE
+
+
+literal ::= FLOAT_LITERAL | INTEGER_LITERAL | boolLiteral | CHAR_LITERAL | FSTRING_LITERAL | MULTILINE_STRING | STRING_LITERAL | voidLiteral
+boolLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD
+voidLiteral ::= VOID_KEYWORD
+
+returnTypeSpec ::= typeExpr THROWS_KEYWORD?
+
+
+block ::= LBRACE statement* RBRACE

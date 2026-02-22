@@ -1,0 +1,267 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "Breom",
+    "scopeName": "source.breom",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#attributes"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#types"
+        },
+        {
+            "include": "#functions"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#punctuation"
+        }
+    ],
+    "repository": {
+        "attributes": {
+            "patterns": [
+                {
+                    "name": "meta.annotation.breom",
+                    "match": "(@)([a-z_][a-zA-Z0-9_]*)",
+                    "captures": {
+                        "1": {
+                            "name": "punctuation.definition.annotation.breom"
+                        },
+                        "2": {
+                            "name": "storage.type.annotation.breom"
+                        }
+                    }
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.breom",
+                    "match": "//.*$"
+                },
+                {
+                    "name": "comment.block.documentation.breom",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "name": "string.quoted.triple.breom",
+                    "begin": "\"\"\"",
+                    "end": "\"\"\""
+                },
+                {
+                    "name": "string.interpolated.breom",
+                    "begin": "f\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "name": "meta.interpolation.breom",
+                            "begin": "\\{",
+                            "end": "\\}",
+                            "beginCaptures": {
+                                "0": {
+                                    "name": "punctuation.section.interpolation.begin.breom"
+                                }
+                            },
+                            "endCaptures": {
+                                "0": {
+                                    "name": "punctuation.section.interpolation.end.breom"
+                                }
+                            },
+                            "patterns": [
+                                {
+                                    "include": "$self"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "constant.character.escape.breom",
+                            "match": "\\\\."
+                        }
+                    ]
+                },
+                {
+                    "name": "string.quoted.double.breom",
+                    "begin": "\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.breom",
+                            "match": "\\\\."
+                        }
+                    ]
+                },
+                {
+                    "name": "string.quoted.single.breom",
+                    "begin": "'",
+                    "end": "'",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.breom",
+                            "match": "\\\\."
+                        }
+                    ]
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.breom",
+                    "match": "\\b(if|else|for|match|return|break|continue|spawn|wait|defer|range|in)\\b"
+                },
+                {
+                    "name": "keyword.declaration.breom",
+                    "match": "\\b(fn|struct|interface|define|test)\\b"
+                },
+                {
+                    "name": "keyword.module.breom",
+                    "match": "\\b(package|module|import|depend|entrypoint|as)\\b"
+                },
+                {
+                    "name": "keyword.modifier.breom",
+                    "match": "\\b(pub|mut|point|to)\\b"
+                },
+                {
+                    "name": "keyword.operator.breom",
+                    "match": "\\b(shl|shr)\\b"
+                },
+                {
+                    "name": "constant.language.breom",
+                    "match": "\\b(true|false|void|default|self)\\b"
+                }
+            ]
+        },
+        "types": {
+            "patterns": [
+                {
+                    "name": "storage.type.primitive.breom",
+                    "match": "\\b(Int|Int8|Int16|Int32|Int64|UInt|UInt8|UInt16|UInt32|UInt64|Float|Float32|Bool|String|Char|Byte|Any)\\b"
+                },
+                {
+                    "name": "storage.type.breom",
+                    "match": "\\b(Option|Result|Map|Set|Chan|Tuple|Ok|Err)\\b"
+                },
+                {
+                    "name": "entity.name.type.breom",
+                    "match": "\\b[A-Z][a-zA-Z0-9]*\\b"
+                }
+            ]
+        },
+        "functions": {
+            "patterns": [
+                {
+                    "name": "entity.name.function.breom",
+                    "match": "\\b([a-z_][a-zA-Z0-9_]*)\\s*(?=\\()"
+                },
+                {
+                    "name": "support.function.builtin.breom",
+                    "match": "\\b(print|println|copy|panic|assert)\\b"
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "name": "constant.numeric.hex.breom",
+                    "match": "\\b0[xX][0-9a-fA-F_]+\\b"
+                },
+                {
+                    "name": "constant.numeric.octal.breom",
+                    "match": "\\b0[oO][0-7_]+\\b"
+                },
+                {
+                    "name": "constant.numeric.binary.breom",
+                    "match": "\\b0[bB][01_]+\\b"
+                },
+                {
+                    "name": "constant.numeric.float.breom",
+                    "match": "\\b[0-9][0-9_]*\\.[0-9][0-9_]*([eE][+-]?[0-9]+)?\\b"
+                },
+                {
+                    "name": "constant.numeric.integer.breom",
+                    "match": "\\b[0-9][0-9_]*\\b"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "name": "keyword.operator.assignment.breom",
+                    "match": ":=|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|="
+                },
+                {
+                    "name": "keyword.operator.channel.breom",
+                    "match": "<<"
+                },
+                {
+                    "name": "keyword.operator.arrow.breom",
+                    "match": "->"
+                },
+                {
+                    "name": "keyword.operator.comparison.breom",
+                    "match": "==|!=|<=|>=|<|>"
+                },
+                {
+                    "name": "keyword.operator.logical.breom",
+                    "match": "&&|\\|\\||!"
+                },
+                {
+                    "name": "keyword.operator.arithmetic.breom",
+                    "match": "\\+|-|\\*|/|%"
+                },
+                {
+                    "name": "keyword.operator.bitwise.breom",
+                    "match": "&|\\||\\^|~"
+                },
+                {
+                    "name": "keyword.operator.error.breom",
+                    "match": "\\?"
+                }
+            ]
+        },
+        "punctuation": {
+            "patterns": [
+                {
+                    "name": "punctuation.separator.breom",
+                    "match": "[,;]"
+                },
+                {
+                    "name": "punctuation.accessor.breom",
+                    "match": "\\."
+                },
+                {
+                    "name": "punctuation.definition.block.breom",
+                    "match": "[{}]"
+                },
+                {
+                    "name": "punctuation.definition.parameters.breom",
+                    "match": "[()]"
+                },
+                {
+                    "name": "punctuation.definition.array.breom",
+                    "match": "[\\[\\]]"
+                }
+            ]
+        }
+    }
+}

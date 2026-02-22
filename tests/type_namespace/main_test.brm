@@ -1,0 +1,70 @@
+import http
+import api
+
+@test
+fn qualified_http_response_status() {
+    web := http.Response {
+        status: 200,
+        body: "ok"
+    }
+    assert(web.status == 200)
+}
+
+@test
+fn qualified_http_response_body() {
+    web := http.Response {
+        status: 200,
+        body: "ok"
+    }
+    assert(len(web.body) == 2)
+}
+
+@test
+fn qualified_api_response_fields() {
+    app := api.Response {
+        code: 42
+    }
+    assert(app.code == 42)
+}
+
+@test
+fn qualified_constructor_resolution() {
+    assert(http.status_of(http.make_response(201)) == 201)
+    assert(api.code_of(api.make_response(7)) == 7)
+}
+
+@test
+fn qualified_method_resolution() {
+    web := http.make_response(200)
+    app := api.make_response(9)
+    assert(http.response_kind(web) == 1)
+    assert(api.response_kind(app) == 2)
+}
+
+@test
+fn qualified_literal_resolution_still_works() {
+    web := http.Response {
+        status: 200,
+        body: "ok"
+    }
+    app := api.Response {
+        code: 9
+    }
+    assert(web.status == 200)
+    assert(app.code == 9)
+}
+
+@test
+fn qualified_new_expression_supports_namespaces() {
+    web := new http.Response(203)
+    app := new api.Response(11)
+    assert(web.status == 203)
+    assert(app.code == 11)
+}
+
+@test
+fn qualified_new_expression_supports_generics() {
+    assert(http.generic_value(17) == 17)
+    box := new http.GenericBox<Int>(19)
+    assert(box.value == 19)
+}

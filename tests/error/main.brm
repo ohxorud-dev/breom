@@ -1,0 +1,100 @@
+fn divide(a Int, b Int) Int throws {
+    if b == 0 {
+        throw new Error("division by zero")
+    }
+    return a / b
+}
+
+fn helper_question_error() Int throws {
+    return divide(10, 0)?
+}
+
+fn helper_prop_error() Int throws {
+    return divide(10, 0)?
+}
+
+fn helper_question_success() Int throws {
+    return divide(20, 4)?
+}
+
+fn level3_fail() Int throws {
+    throw new Error("level3")
+}
+
+fn level2_fail() Int throws {
+    return level3_fail()?
+}
+
+fn level1_fail() Int throws {
+    return level2_fail()?
+}
+
+fn helper_defer_and_question_propagation(flags []Int) Int throws {
+    defer {
+        flags[0] = 7
+    }
+    return divide(10, 0)?
+}
+
+fn helper_defer_lifo_on_question(trace []Int) Int throws {
+    defer {
+        trace[0] = trace[0] * 10 + 1
+    }
+    defer {
+        trace[0] = trace[0] * 10 + 2
+    }
+    return divide(10, 0)?
+}
+
+fn helper_nested_question_inner(trace []Int) Int throws {
+    defer {
+        trace[0] = trace[0] * 10 + 1
+    }
+    return divide(10, 0)?
+}
+
+fn helper_nested_question_outer(trace []Int) Int throws {
+    defer {
+        trace[0] = trace[0] * 10 + 2
+    }
+    return helper_nested_question_inner(trace)?
+}
+
+fn helper_defer_lifo_on_question_success(trace []Int) Int throws {
+    defer {
+        trace[0] = trace[0] * 10 + 1
+    }
+    defer {
+        trace[0] = trace[0] * 10 + 2
+    }
+    return divide(12, 3)?
+}
+
+fn helper_question_propagation_skips_tail(trace []Int) Int throws {
+    trace[0] = 1
+    defer {
+        trace[1] = trace[1] * 10 + 7
+    }
+
+    val := divide(10, 0)?
+    trace[0] = 2
+    return val
+}
+
+fn helper_nested_question_inner_success(trace []Int) Int throws {
+    defer {
+        trace[0] = trace[0] * 10 + 1
+    }
+    return divide(12, 3)?
+}
+
+fn helper_nested_question_outer_success(trace []Int) Int throws {
+    defer {
+        trace[0] = trace[0] * 10 + 2
+    }
+    return helper_nested_question_inner_success(trace)?
+}
+
+fn main() Int {
+    return 0
+}

@@ -1,0 +1,6 @@
+interface StringConvertable {
+    to String
+}
+
+fn print(s StringConvertable) {}
+fn println(s StringConvertable) {}

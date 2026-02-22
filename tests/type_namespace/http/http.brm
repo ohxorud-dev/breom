@@ -1,0 +1,40 @@
+struct Response {
+    pub status Int
+    pub body String
+
+    new(status Int) Response {
+        return Response {
+            status: status,
+            body: "ok"
+        }
+    }
+
+    fn kind() Int {
+        return 1
+    }
+}
+
+struct GenericBox<T> {
+    pub value Int
+
+    new(v Int) GenericBox<T> {
+        return GenericBox<T> { value: v }
+    }
+}
+
+pub fn make_response(status Int) Response {
+    return new Response(status)
+}
+
+pub fn response_kind(r Response) Int {
+    return r.kind()
+}
+
+pub fn status_of(r Response) Int {
+    return r.status
+}
+
+pub fn generic_value(v Int) Int {
+    box := new GenericBox<Int>(v)
+    return box.value
+}

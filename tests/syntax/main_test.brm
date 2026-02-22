@@ -1,0 +1,769 @@
+struct BoxNum {
+    v Int
+
+    op + (other BoxNum) BoxNum {
+        return BoxNum { v: self.v + other.v }
+    }
+
+    to Int {
+        return self.v
+    }
+}
+
+interface AliasStringable {
+    as String
+}
+
+interface StringConvertable {
+    to String
+}
+
+struct AliasPrintable: AliasStringable {
+    v Int
+
+    to String {
+        return self.v as String
+    }
+}
+
+struct BuiltinPrintable: StringConvertable {
+    v Int
+
+    to String {
+        return self.v as String
+    }
+}
+
+struct NotPrintable {
+    v Int
+}
+
+interface WithDefaultString {
+    to String {
+        return "default-text"
+    }
+}
+
+struct UsesInterfaceDefault: WithDefaultString {}
+
+interface AmbiguousA {
+    to String {
+        return "A"
+    }
+}
+
+interface AmbiguousB {
+    to String {
+        return "B"
+    }
+}
+
+@test
+fn shift_and_bitnot_operations() {
+    left := 1 shl 4
+    right := 16 shr 2
+    inv := ~0
+
+    assert(left == 16)
+    assert(right == 4)
+    assert(inv == -1)
+}
+
+@test
+fn bitwise_and_or_xor_operations() {
+    a := 0b1100
+    b := 0b1010
+
+    and_result := a & b
+    or_result := a | b
+    xor_result := a ^ b
+
+    assert(and_result == 0b1000)
+    assert(or_result == 0b1110)
+    assert(xor_result == 0b0110)
+}
+
+@test
+fn radix_integer_literals_hex_octal_binary() {
+    a := 0x2A
+    b := 0o52
+    c := 0b101010
+
+    assert(a == 42)
+    assert(b == 42)
+    assert(c == 42)
+}
+
+@test
+fn fstring_interpolation() {
+    name := "breom"
+    n := 7
+    s := f"hello {name} {n}"
+
+    assert(s == "hello breom 7")
+}
+
+@test
+fn multiline_string_literal() {
+    s := """line1
+line2"""
+    assert(s == "line1\nline2")
+}
+
+@test
+fn struct_operator_and_conversion_with_cast() {
+    a := BoxNum { v: 10 }
+    b := BoxNum { v: 32 }
+    c := a + b
+    n := c as Int
+
+    assert(n == 42)
+}
+
+@test
+fn interface_as_member_supports_cast_contract() {
+    value := AliasPrintable { v: 21 }
+    s := value as String
+    assert(s == "21")
+}
+
+@test
+fn builtin_print_accepts_string_convertable() {
+    value := BuiltinPrintable { v: 7 }
+    print(value)
+    println(value)
+    assert((value as String) == "7")
+}
+
+@test
+fn interface_default_conversion_is_used_when_struct_missing_to() {
+    value := UsesInterfaceDefault {}
+    assert((value as String) == "default-text")
+}
+
+@test
+@parser_fail("fixtures/interface_default_conversion_ambiguous_fail.brm")
+fn interface_default_conversion_ambiguity_requires_explicit_impl() {
+}
+
+@test
+@compile_fail(
+    "print()/println() requires String or StringConvertable"
+)
+fn builtin_print_rejects_non_convertable() Int {
+    value := NotPrintable { v: 1 }
+    print(value)
+    return 0
+}
+
+
+@test
+fn arithmetic_operator_precedence_and_grouping() {
+    v1 := 2 + 3 * 4
+    v2 := (2 + 3) * 4
+    v3 := 20 / 5 + 6 % 4
+
+    assert(v1 == 14)
+    assert(v2 == 20)
+    assert(v3 == 6)
+}
+
+@test
+fn bitwise_mixed_with_shift_operations() {
+    base := 0b1011
+    mixed := (base shl 2) & 0b111100
+    folded := (0b1100 | 0b0011) ^ 0b0101
+
+    assert(mixed == 0b101100)
+    assert(folded == 0b1010)
+}
+
+@test
+fn order_of_operations_arithmetic_chain() {
+    value := 2 + 3 * 4 - 10 / 2 + 7 % 3
+    assert(value == 10)
+}
+
+@test
+fn unary_minus_precedence_with_multiplication() {
+    a := -3 * 4
+    b := -(3 * 4)
+    c := (-3) * 4
+
+    assert(a == -12)
+    assert(b == -12)
+    assert(c == -12)
+}
+
+@test
+fn parenthesized_expression_overrides_precedence() {
+    plain := 1 + 2 * 3
+    grouped := (1 + 2) * 3
+
+    assert(plain == 7)
+    assert(grouped == 9)
+}
+
+@test
+fn comparison_and_equality_with_grouping() {
+    a := (3 + 4) > (2 * 3)
+    b := (3 + 4) == (2 * 3)
+    c := (10 - 2) >= (4 + 4)
+    d := (10 - 2) <= (4 + 3)
+
+    assert(a == true)
+    assert(b == false)
+    assert(c == true)
+    assert(d == false)
+}
+
+@test
+fn shift_precedence_against_addition() {
+    v1 := 1 shl 2 + 1
+    v2 := (1 shl 2) + 1
+    v3 := 1 shl (2 + 1)
+
+    assert(v1 == 8)
+    assert(v2 == 5)
+    assert(v3 == 8)
+}
+
+@test
+fn bitnot_combined_with_binary_bitwise_ops() {
+    masked := (~0) & 0b1010
+    mixed := (~0b1010) | 0b0011
+
+    assert(masked == 0b1010)
+    assert(mixed == -9)
+}
+
+@test
+fn lambda_expression_syntax_produces_callable_value() {
+    f := (x Int) -> x + 1
+    assert(f(41) == 42)
+}
+
+@test
+fn lambda_block_syntax_produces_callable_value() {
+    g := (x Int, y Int) -> {
+        sum := x + y
+        sum * 2
+    }
+    assert(g(20, 1) == 42)
+}
+
+@test
+fn test_lambda_expression_body_invocation_returns_value() {
+    f := (x Int) -> x + 1
+    got := f(41)
+    assert(got == 42)
+}
+
+@test
+fn test_lambda_block_body_invocation_returns_value() {
+    g := (x Int, y Int) -> {
+        sum := x + y
+        sum * 2
+    }
+
+    got := g(20, 1)
+    assert(got == 42)
+}
+
+@test
+fn test_lambda_expression_body_with_explicit_return_type() {
+    f := (x Int) Int -> x + 1
+    got := f(41)
+    assert(got == 42)
+}
+
+@test
+fn test_lambda_block_body_with_explicit_return_type() {
+    g := (x Int, y Int) Int -> {
+        return (x + y) * 2
+    }
+
+    got := g(20, 1)
+    assert(got == 42)
+}
+
+@test
+fn lambda_float_param_and_return_via_indirect_call() {
+    scale := (x Float) Float -> x * 1.5
+    got := scale(8.0)
+    assert(got > 11.9)
+    assert(got < 12.1)
+}
+
+@test
+fn lambda_mixed_params_with_float_return_via_indirect_call() {
+    blend := (a Float, b Float) Float -> a + b
+    got := blend(10.0, 2.5)
+    assert(got > 12.4)
+    assert(got < 12.6)
+}
+
+@test
+fn variable_compound_assignment_arithmetic_chain() {
+    mut value Int = 30
+    value += 5
+    value -= 8
+    value *= 3
+    value /= 9
+    value %= 4
+    assert(value == 1)
+}
+
+@test
+fn variable_compound_assignment_bitwise_chain() {
+    mut bits Int = 14
+    bits &= 11
+    assert(bits == 10)
+
+    bits |= 1
+    assert(bits == 11)
+
+    bits ^= 7
+    assert(bits == 12)
+}
+
+struct Point {
+    mut x Int
+    mut y Int
+}
+
+struct Rect {
+    mut top_left Point
+    mut bottom_right Point
+}
+
+@test
+fn struct_member_assignment_and_compound() {
+    p := Point { x: 1, y: 2 }
+    p.x = 10
+    p.y += 5
+
+    assert(p.x == 10)
+    assert(p.y == 7)
+}
+
+@test
+fn nested_struct_member_assignment() {
+    r := Rect {
+        top_left: Point { x: 0, y: 0 },
+        bottom_right: Point { x: 5, y: 5 }
+    }
+
+    r.top_left.x = 2
+    r.bottom_right.y += 3
+
+    assert(r.top_left.x == 2)
+    assert(r.bottom_right.y == 8)
+}
+
+@test
+fn collection_index_assignment_and_compound() {
+    values := [1, 2, 3, 4]
+    values[0] = 9
+    values[1] += 8
+    values[2] *= 2
+    values[3] -= 1
+
+    assert(values[0] == 9)
+    assert(values[1] == 10)
+    assert(values[2] == 6)
+    assert(values[3] == 3)
+}
+
+@test
+fn struct_in_array_index_then_member_assignment() {
+    points := [Point { x: 1, y: 1 }, Point { x: 2, y: 2 }]
+    points[1].x += 5
+    points[0].y = 9
+
+    assert(points[1].x == 7)
+    assert(points[0].y == 9)
+}
+
+struct Metrics {
+    temp Float
+    ok Bool
+    label String
+}
+
+struct SafeBox {
+    value Int
+
+    new(v Int) SafeBox throws {
+        if v < 0 {
+            throw new Error("negative")
+        }
+        return SafeBox { value: v }
+    }
+}
+
+@test
+fn struct_field_load_uses_declared_field_type() {
+    m := Metrics { temp: 36.5, ok: true, label: "ok" }
+
+    assert(m.temp == 36.5)
+    assert(m.ok == true)
+    assert(m.label == "ok")
+}
+
+@test
+fn new_throws_constructor_returns_value_on_success() {
+    box SafeBox = make_safe_box(7) instead SafeBox { value: -1 }
+    assert(box.value == 7)
+}
+
+@test
+fn new_throws_constructor_propagates_error_to_catch() {
+    box SafeBox = make_safe_box(-1) instead SafeBox { value: -1 }
+    assert(box.value == -1)
+}
+
+@test
+@compile_fail(
+    "Member access on non-struct type"
+)
+fn unknown_receiver_member_access_compile_error() Int {
+    maker := () -> make_point_for_member()
+    return maker().z
+}
+
+struct Thermo {
+    mut c Float
+}
+
+struct NestedMetrics {
+    inner Metrics
+}
+
+struct GenericBox<T> {
+    value T
+}
+
+struct IntOnlyBox<T: Int> {
+    value T
+}
+
+@test
+fn float_struct_field_compound_assignment() {
+    t := Thermo { c: 1.5 }
+    t.c += 0.5
+    t.c *= 4.0
+    assert(t.c == 8.0)
+}
+
+@test
+fn member_access_after_function_call_uses_return_type() {
+    assert(make_point_for_member().x == 11)
+    assert(make_point_for_member().y == 22)
+}
+
+@test
+fn deep_member_chain_float_field_access() {
+    n NestedMetrics = make_nested_metrics()
+    assert(n.inner.temp == 10.25)
+}
+
+@test
+fn deep_member_chain_bool_field_access() {
+    n NestedMetrics = make_nested_metrics()
+    assert(n.inner.ok == true)
+}
+
+@test
+fn deep_member_chain_string_field_access() {
+    n NestedMetrics = make_nested_metrics()
+    label String = n.inner.label
+    assert(label == "nested")
+}
+
+@test
+fn new_throws_constructor_value_slot_success_path() {
+    got := get_safe_value(9) instead -1
+    assert(got == 9)
+}
+
+@test
+fn new_throws_constructor_value_slot_error_path() {
+    got := get_safe_value(-9) instead -1
+    assert(got == -1)
+}
+
+@test
+fn ternary_parses_and_evaluates_basic_expression() {
+    got := (3 > 1) ? 5 : 9
+    assert(got == 5)
+}
+
+@test
+fn ternary_and_postfix_error_propagation_coexist() {
+    ok := ternary_with_question_and_colon(3) instead -1
+    err := ternary_with_question_and_colon(-3) instead -1
+
+    assert(ok == 11)
+    assert(err == -1)
+}
+
+@test
+fn generic_struct_literal_with_explicit_type_args() {
+    box GenericBox<Int> = GenericBox<Int> { value: 99 }
+    assert(box.value == 99)
+}
+
+@test
+fn generic_struct_literal_function_return_type_is_usable_for_member_access() {
+    box GenericBox<Int> = make_generic_box_value(123)
+    assert(box.value == 123)
+}
+
+@test
+fn generic_constraint_accepts_matching_type() {
+    box IntOnlyBox<Int> = IntOnlyBox<Int> { value: 7 }
+    assert(box.value == 7)
+}
+
+@test
+fn generic_constraint_accepts_int_family_alias() {
+    box IntOnlyBox<Int32> = IntOnlyBox<Int32> { value: 7 }
+    assert(box.value == 7)
+}
+
+@test
+@compile_fail(
+    "Generic argument 'String' does not satisfy constraint 'Int' for 'T'"
+)
+fn generic_constraint_rejects_non_matching_type() Int {
+    _ := IntOnlyBox<String> { value: "x" }
+    return 0
+}
+
+@test
+@compile_fail(
+    "Type mismatch for 'n': expected Int, got String"
+)
+fn typed_variable_rejects_mismatched_initializer() Int {
+    n Int = "bad"
+    return n
+}
+
+@test
+@compile_fail(
+    "Type mismatch for 'n': expected Int, got String"
+)
+fn assignment_rejects_mismatched_value() Int {
+    mut n Int = 1
+    n = "bad"
+    return n
+}
+
+@test
+fn direct_new_throws_constructor_success_path() {
+    box SafeBox = new SafeBox(12) instead SafeBox { value: -1 }
+    assert(box.value == 12)
+}
+
+@test
+fn direct_new_throws_constructor_error_path() {
+    box SafeBox = new SafeBox(-12) instead SafeBox { value: -1 }
+    assert(box.value == -1)
+}
+
+@test
+fn member_chain_on_function_call_for_nested_struct() {
+    assert(make_nested_metrics().inner.temp == 10.25)
+}
+
+@test
+@compile_fail(
+    "Member access on non-struct type"
+)
+fn member_access_on_non_struct_compile_error() Int {
+    x := 42
+    return x.value
+}
+
+@test
+@compile_fail(
+    "Member access on non-struct type"
+)
+fn nested_unknown_receiver_member_access_compile_error() Int {
+    f := () -> make_generic_box_value(1)
+    return f().missing
+}
+
+@test
+@compile_fail(
+    "Member access on non-struct type"
+)
+fn unknown_receiver_member_access_via_lambda_compile_error() Int {
+    maker := () -> make_nested_metrics()
+    return maker().inner.unknown
+}
+
+enum MaybeInt {
+    Some(Int)
+    None
+}
+
+enum NestedMaybeInt {
+    Wrap(MaybeInt)
+    Empty
+}
+
+interface Named {
+    fn name(self) String
+}
+
+struct BaseEntity {
+    id Int
+
+    pub fn next_id(self) Int {
+        return self.id + 1
+    }
+}
+
+struct PointInfo {
+    x Int
+
+    pub fn inc(self) Int {
+        return self.x + 1
+    }
+}
+
+struct UserEntity: BaseEntity, Named {
+    point info PointInfo
+    title String
+
+    pub fn name(self) String {
+        return self.title
+    }
+}
+
+struct LeftParent {
+    left Int
+
+    pub fn left_value(self) Int {
+        return self.left
+    }
+}
+
+struct RightParent {
+    right Int
+
+    pub fn right_value(self) Int {
+        return self.right
+    }
+}
+
+struct MultiEntity: LeftParent, RightParent {
+    label String
+}
+
+struct CollisionA {
+    pub fn pick(self) Int {
+        return 1
+    }
+}
+
+struct CollisionB {
+    pub fn pick(self) Int {
+        return 2
+    }
+}
+
+struct CollisionEntity: CollisionA, CollisionB {}
+
+@resolve_inherit("method:pick", "CollisionB")
+struct ResolvedCollisionEntity: CollisionA, CollisionB {}
+
+struct OverrideCollisionEntity: CollisionA, CollisionB {
+    @inherit_from("CollisionA")
+    pub fn pick(self) Int {
+        return 77
+    }
+}
+
+@test
+fn match_enum_pattern_binds_payload() {
+    v := MaybeInt { __tag: 0, __payload0: 41 }
+    mut got Int = 0
+    match v {
+        Some(x) => {
+            got = x
+        }
+        _ => {
+            got = -1
+        }
+    }
+    assert(got == 41)
+}
+
+@test
+fn struct_inheritance_inherits_fields_and_methods() {
+    user := UserEntity { id: 7, info: PointInfo { x: 99 }, title: "neo" }
+    assert(user.id == 7)
+    assert(user.next_id() == 8)
+    assert(user.name() == "neo")
+}
+
+@test
+fn multiple_concrete_inheritance_inherits_all_parent_members() {
+    item := MultiEntity { left: 10, right: 20, label: "ok" }
+    assert(item.left == 10)
+    assert(item.right == 20)
+    assert(item.left_value() == 10)
+    assert(item.right_value() == 20)
+}
+
+@test
+@compile_fail(
+    "Ambiguous inherited method"
+)
+fn multiple_concrete_inheritance_reports_ambiguous_method() Int {
+    value := CollisionEntity {}
+    return value.pick()
+}
+
+@test
+fn struct_attribute_resolves_ambiguous_parent_method() {
+    value := ResolvedCollisionEntity {}
+    assert(value.pick() == 2)
+}
+
+@test
+fn method_attribute_validates_override_parent_origin() {
+    value := OverrideCollisionEntity {}
+    assert(value.pick() == 77)
+}
+
+@test
+fn point_field_promotes_member_access() {
+    user := UserEntity { id: 1, info: PointInfo { x: 12 }, title: "a" }
+    assert(user.x == 12)
+}
+
+@test
+fn point_field_promotes_method_call() {
+    user := UserEntity { id: 1, info: PointInfo { x: 12 }, title: "a" }
+    assert(user.inc() == 13)
+}
+
+@test
+fn match_nested_enum_pattern_binds_payload() {
+    inner := MaybeInt { __tag: 0, __payload0: 77 }
+    outer := NestedMaybeInt { __tag: 0, __payload0: inner }
+    mut got Int = 0
+    match outer {
+        Wrap(Some(x)) => {
+            got = x
+        }
+        _ => {
+            got = -1
+        }
+    }
+    assert(got == 77)
+}

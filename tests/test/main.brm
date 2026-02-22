@@ -1,0 +1,10 @@
+fn divide(a Int, b Int) Int throws {
+    if b == 0 {
+        throw new Error("division by zero")
+    }
+    return a / b
+}
+
+fn main() Int {
+    return 0
+}

@@ -1,0 +1,164 @@
+@test
+fn catch_returns_fallback() {
+    val := divide(10, 0) catch {
+        assert(err != 0)
+        instead -1
+    }
+    assert(val == -1)
+
+    val2 := divide(10, 2) catch {
+        fail("unexpected catch on divide(10, 2)")
+        instead -1
+    }
+    assert(val2 == 5)
+}
+
+@test
+fn question_propagates_error() {
+    got := helper_question_error() catch {
+        assert(err != 0)
+        instead -1
+    }
+    assert(got == -1)
+}
+
+@test
+fn question_operator_propagates_error() {
+    got := helper_prop_error() catch {
+        assert(err != 0)
+        instead -1
+    }
+    assert(got == -1)
+}
+
+@test
+fn nested_catch_inner_handles_error() {
+    outer := divide(1, 0) catch {
+        inner := divide(2, 0) catch {
+            assert(err != 0)
+            instead 222
+        }
+        assert(inner == 222)
+        instead 111
+    }
+    assert(outer == 111)
+}
+
+@test
+fn question_success_path_value() {
+    val := helper_question_success() catch {
+        fail("unexpected error in success path")
+        instead -1
+    }
+    assert(val == 5)
+}
+
+@test
+fn question_chain_across_multiple_throws_functions() {
+    got := level1_fail() catch {
+        assert(err != 0)
+        instead -404
+    }
+    assert(got == -404)
+}
+
+@test
+fn division_by_zero_is_catchable_and_repeatable() {
+    first := divide(42, 0) catch {
+        assert(err != 0)
+        instead -10
+    }
+    second := divide(100, 0) catch {
+        assert(err != 0)
+        instead -20
+    }
+
+    assert(first == -10)
+    assert(second == -20)
+}
+
+@test
+fn test_defer_and_question_propagation_interaction() {
+    flags := [0]
+
+    got := helper_defer_and_question_propagation(flags) catch {
+        assert(err != 0)
+        instead -1
+    }
+
+    assert(got == -1)
+    assert(flags[0] == 7)
+}
+
+@test
+fn defer_lifo_order_is_preserved_on_question_propagation() {
+    trace := [0]
+
+    got := helper_defer_lifo_on_question(trace) catch {
+        assert(err != 0)
+        instead -1
+    }
+
+    assert(got == -1)
+    assert(trace[0] == 21)
+}
+
+@test
+fn nested_question_propagation_runs_callee_then_caller_defers() {
+    trace := [0]
+
+    got := helper_nested_question_outer(trace) catch {
+        assert(err != 0)
+        instead -1
+    }
+
+    assert(got == -1)
+    assert(trace[0] == 12)
+}
+
+@test
+fn defer_lifo_order_is_preserved_on_question_success_path() {
+    trace := [0]
+
+    got := helper_defer_lifo_on_question_success(trace) catch {
+        fail("unexpected catch on success path")
+        instead -1
+    }
+
+    assert(got == 4)
+    assert(trace[0] == 21)
+}
+
+@test
+fn question_propagation_skips_following_statements_and_runs_defer() {
+    trace := [0, 0]
+
+    got := helper_question_propagation_skips_tail(trace) catch {
+        assert(err != 0)
+        instead -1
+    }
+
+    assert(got == -1)
+    assert(trace[0] == 1)
+    assert(trace[1] == 7)
+}
+
+@test
+fn error_path_then_success_path_do_not_leak_question_state() {
+    trace_fail := [0]
+    failed := helper_nested_question_outer(trace_fail) catch {
+        assert(err != 0)
+        instead -1
+    }
+
+    trace_ok := [0]
+    succeeded := helper_nested_question_outer_success(trace_ok) catch {
+        fail("unexpected catch after previous propagation")
+        instead -1
+    }
+
+    assert(failed == -1)
+    assert(trace_fail[0] == 12)
+    assert(succeeded == 4)
+    assert(trace_ok[0] == 12)
+}

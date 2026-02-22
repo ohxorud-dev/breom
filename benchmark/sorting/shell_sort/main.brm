@@ -1,0 +1,32 @@
+fn main() Int {
+    values := [0]
+    for i := range 3200 {
+        values.push((i * 29 + 13) % 20000)
+    }
+
+    n := values.len()
+    for i := range n {
+        if i == 0 {
+            continue
+        }
+
+        key := values[i]
+        mut j Int = i - 1
+        for j >= 0 {
+            if values[j] <= key {
+                break
+            }
+            values[j + 1] = values[j]
+            j = j - 1
+        }
+        values[j + 1] = key
+    }
+
+    mut checksum Int = 0
+    for i := range 128 {
+        checksum = checksum + values[i]
+    }
+
+    println(checksum as String)
+    return 0
+}

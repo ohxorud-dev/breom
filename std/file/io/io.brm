@@ -1,0 +1,31 @@
+pub struct Reader {
+    pub fn read_all() String throws {
+        return ""
+    }
+    pub fn close() Bool {
+        return true
+    }
+}
+
+pub struct Scanner {
+    pub fn has_next() Bool {
+        return false
+    }
+    pub fn next_line() String throws {
+        return ""
+    }
+    pub fn close() Bool {
+        return true
+    }
+}
+
+pub fn reader(path String) Reader throws {}
+pub fn scanner(path String) Scanner throws {}
+
+pub fn read(path String) String throws {}
+pub fn read_byte_sum(path String) Int throws {}
+pub fn write(path String, data String) Int throws {}
+pub fn append(path String, data String) Int throws {}
+pub fn exists(path String) Bool {}
+pub fn remove(path String) Bool {}
+pub fn mkdir(path String) Bool {}

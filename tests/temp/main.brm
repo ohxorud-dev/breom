@@ -1,0 +1,20 @@
+fn make_static_array() [3]Int {
+    local [3]Int = [11, 22, 33]
+    return local
+}
+
+fn pass_through(arr [3]Int) [3]Int {
+    return arr
+}
+
+fn make_padded_static_array() [5]Int {
+    local [5]Int = [1, 2, 3]
+    return local
+}
+
+fn corrupt_stack() {
+    junk [100]Int = [0; 100]
+    for i := range 100 {
+        junk[i] = 999
+    }
+}

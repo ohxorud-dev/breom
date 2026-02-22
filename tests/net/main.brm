@@ -1,0 +1,39 @@
+import net.udp
+
+fn main() Int {
+    println("Binding to port 8080...")
+    res := udp.bind(8080)
+
+    if res != 0 {
+        println("Successfully bound to port 8080")
+
+        socket := res.socket
+        rx := res.rx
+
+        spawn {
+            for {
+                wait {
+                    msg := << rx => {
+                        print("Received message: ")
+                        println("(message received)")
+                    }
+                }
+            }
+        }
+
+        for {
+            println("Sending packet to 127.0.0.1:8080 (self)...")
+            bytes := udp.send(socket, "127.0.0.1", 8080, "Hello through channel!")
+
+            print("Sent ")
+            print(bytes as String)
+            println(" bytes")
+
+            sleep(100)
+        }
+    } else {
+        println("Failed to bind to port 8080")
+    }
+
+    return 0
+}

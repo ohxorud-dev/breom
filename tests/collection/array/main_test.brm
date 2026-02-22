@@ -1,0 +1,128 @@
+@test
+fn array_style_dynamic_collection_updates() {
+    array := [5, 10, 15, 20]
+    array[1] = 99
+    array[3] /= 4
+
+    assert(array[0] == 5)
+    assert(array[1] == 99)
+    assert(array[2] == 15)
+    assert(array[3] == 5)
+}
+
+@test
+fn array_index_assignment_and_compound_ops() {
+    array := [1, 2, 3, 4]
+    array[0] = 9
+    array[1] += 8
+    array[2] *= 2
+    array[3] -= 1
+
+    assert(array[0] == 9)
+    assert(array[1] == 10)
+    assert(array[2] == 6)
+    assert(array[3] == 3)
+}
+
+@test
+fn static_array_short_initializer_is_default_padded() {
+    array [5]Int = [1, 2, 3]
+
+    assert(array[0] == 1)
+    assert(array[1] == 2)
+    assert(array[2] == 3)
+    assert(array[3] == 0)
+    assert(array[4] == 0)
+}
+
+@test
+fn repeated_literal_creates_dynamic_array() {
+    array := [2; 5]
+
+    assert(array.len() == 5)
+    assert(array[0] == 2)
+    assert(array[1] == 2)
+    assert(array[2] == 2)
+    assert(array[3] == 2)
+    assert(array[4] == 2)
+}
+
+@test
+fn static_array_repeat_and_padding_work() {
+    array [5]Int = [7; 3]
+
+    assert(array[0] == 7)
+    assert(array[1] == 7)
+    assert(array[2] == 7)
+    assert(array[3] == 0)
+    assert(array[4] == 0)
+}
+
+struct Cell {
+    value Int
+}
+
+@test
+fn struct_default_padding_uses_type_default() {
+    array [2]Cell = [Cell { value: 42 }]
+
+    assert(array[0].value == 42)
+    assert(array[1].value == 0)
+}
+
+@test
+fn static_array_assignment_uses_declared_type_context() {
+    array [4]Int = [1, 2, 3, 4]
+    array = [7, 8]
+
+    assert(array[0] == 7)
+    assert(array[1] == 8)
+    assert(array[2] == 0)
+    assert(array[3] == 0)
+}
+
+@test
+fn static_array_function_param_uses_contextual_typing() {
+    sum := static_array_sum([5, 6])
+    assert(sum == 11)
+}
+
+@test
+fn static_array_function_return_uses_contextual_typing() {
+    arr := static_array_from_literal()
+    assert(arr[0] == 9)
+    assert(arr[1] == 10)
+    assert(arr[2] == 0)
+    assert(arr[3] == 0)
+}
+
+@test
+@compile_fail(
+    "Static array length mismatch"
+)
+fn static_array_context_mismatch_fails_to_compile() Int {
+    return static_array_sum([1, 2, 3, 4, 5])
+}
+
+@test
+@compile_fail(
+    "Static array length mismatch"
+)
+fn static_array_return_context_mismatch_fails_to_compile() [2]Int {
+    return [1, 2, 3]
+}
+
+@test
+fn dynamic_array_push_updates_receiver_after_realloc() {
+    values := [0]
+
+    for i := range 64 {
+        values.push(i + 1)
+    }
+
+    assert(values.len() == 65)
+    assert(values[0] == 0)
+    assert(values[1] == 1)
+    assert(values[32] == 32)
+    assert(values[64] == 64)
+}

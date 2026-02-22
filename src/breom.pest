@@ -1,0 +1,330 @@
+program = { SOI ~ depend_decl* ~ top_level_item* ~ EOI }
+project_file = { SOI ~ breom_decl ~ module_decl ~ entrypoint_decl? ~ dep_decl* ~ EOI }
+
+breom_decl = { "breom" ~ semver }
+module_decl = { "package" ~ module_path }
+entrypoint_decl = { "entrypoint" ~ file_path }
+depend_decl = { "import" ~ module_path ~ ("as" ~ identifier)? }
+dep_decl = { "dep" ~ string_literal ~ string_literal }
+module_path = @{ identifier ~ ("." ~ identifier)* }
+file_path = @{ (ASCII_ALPHANUMERIC | "_" | "/" | ".")+ }
+semver = @{ semver_core ~ semver_prerelease? ~ semver_build? }
+semver_core = { semver_numeric ~ "." ~ semver_numeric ~ "." ~ semver_numeric }
+semver_prerelease = { "-" ~ semver_identifier ~ ("." ~ semver_identifier)* }
+semver_build = { "+" ~ semver_identifier ~ ("." ~ semver_identifier)* }
+semver_identifier = { ASCII_ALPHANUMERIC+ ~ ("-" ~ ASCII_ALPHANUMERIC+)* }
+semver_numeric = { "0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
+
+COMMENT = _{ line_comment | doc_comment }
+line_comment = _{ "//" ~ (!NEWLINE ~ ANY)* }
+doc_comment = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+NEWLINE = _{ "\r\n" | "\n" | "\r" }
+
+identifier = @{ !keyword ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+keyword = @{
+    ( "module" | "depend" | "dep" | "as" | "pub" | "mut" | "define" | "fn" | "return"
+     | "defer" | "for" | "range" | "if" | "else" | "struct" | "interface"
+     | "enum"
+     | "attribute"
+    | "match" | "spawn" | "wait" | "default" | "timeout" | "point" | "Void"
+    | "true" | "false" | "shl" | "shr" | "break" | "continue" | "in"
+    | "Tuple" | "entrypoint" | "package" | "import" | "breom" | "new" | "op" | "to"
+    | "catch" | "throw" | "throws" | "instead"
+    ) ~ !(ASCII_ALPHANUMERIC | "_")
+}
+
+throws_keyword = { "throws" }
+return_type_spec = { type_expr ~ throws_keyword? }
+
+top_level_item = {
+    define_decl
+    | struct_decl
+    | interface_decl
+    | enum_decl
+    | attribute_decl
+    | function_decl
+    | statement
+}
+
+define_decl = { "define" ~ identifier ~ type_annotation? ~ ("=" | ":=") ~ expression }
+
+var_decl = {
+    visibility? ~ mutability? ~ identifier ~ type_annotation ~ "=" ~ expression
+    | visibility? ~ mutability? ~ identifier ~ ":=" ~ expression
+}
+
+visibility = { "pub" }
+mutability = { "mut" }
+point_keyword = { "point" }
+type_annotation = { type_expr }
+
+type_expr = {
+    function_type
+    | chan_type
+    | tuple_type
+    | array_type
+    | dynamic_array_type
+    | generic_type
+    | base_type
+}
+
+base_type = @{ (identifier ~ ".")* ~ ASCII_ALPHA_UPPER ~ (ASCII_ALPHANUMERIC | "_")* }
+generic_type = { base_type ~ "<" ~ type_list ~ ">" }
+type_list = { type_constraint ~ ("," ~ type_constraint)* }
+type_constraint = { type_expr ~ (":" ~ constraint_list)? }
+constraint_list = { type_expr ~ ("," ~ type_expr)* }
+
+array_type = { "[" ~ integer_literal ~ "]" ~ type_expr }
+dynamic_array_type = { "[" ~ "]" ~ type_expr }
+chan_type = { "Channel" ~ "<" ~ type_expr ~ ">" }
+tuple_type = { "Tuple" ~ "[" ~ type_list ~ "]" }
+function_type = { "fn" ~ "(" ~ param_type_list? ~ ")" ~ type_expr? }
+param_type_list = { type_expr ~ ("," ~ type_expr)* }
+
+attribute_decl = { "attribute" ~ identifier ~ attribute_decl_params? }
+attribute_decl_params = { "(" ~ attribute_param_list? ~ ")" }
+attribute_param_list = { attribute_param ~ ("," ~ attribute_param)* }
+attribute_param = { identifier ~ type_expr }
+
+attribute = { attribute_with_args | attribute_no_args }
+attribute_no_args = { "@" ~ identifier }
+attribute_with_args = { "@" ~ identifier ~ "(" ~ arg_list ~ ")" }
+attributes = { attribute* }
+function_decl = {
+    attributes? ~ visibility? ~ "fn" ~ identifier ~ generic_params? ~ "(" ~ param_list? ~ ")" ~ return_type_spec? ~ block
+}
+generic_params = { "<" ~ generic_param ~ ("," ~ generic_param)* ~ ">" }
+generic_param = { identifier ~ (":" ~ constraint_list)? }
+param_list = { param ~ ("," ~ param)* }
+param = { mutability? ~ identifier ~ type_expr }
+
+struct_decl = {
+    attributes? ~ visibility? ~ "struct" ~ base_type ~ generic_params? ~ inheritance? ~ struct_body
+}
+inheritance = { ":" ~ type_expr ~ ("," ~ type_expr)* }
+struct_body = { "{" ~ struct_member* ~ "}" }
+struct_member = {
+    constructor_decl
+    | default_decl
+    | operator_decl
+    | conversion_decl
+    | method_decl
+    | field_decl
+}
+
+constructor_decl = { visibility? ~ "new" ~ "(" ~ param_list? ~ ")" ~ return_type_spec? ~ block }
+default_decl = { visibility? ~ "default" ~ "(" ~ ")" ~ block }
+operator_decl = { visibility? ~ "op" ~ operator_symbol ~ "(" ~ param_list? ~ ")" ~ return_type_spec? ~ block }
+conversion_keyword = { "to" | "as" }
+conversion_decl = { visibility? ~ conversion_keyword ~ type_expr ~ block }
+
+operator_symbol = @{ "||" | "&&" | "|" | "^" | "&" | "==" | "!=" | "<=" | ">=" | "<" | ">" | "shl" | "shr" | "+" | "-" | "*" | "/" | "%" }
+
+field_decl = { visibility? ~ point_keyword? ~ mutability? ~ identifier ~ type_expr }
+method_decl = { attributes? ~ visibility? ~ "fn" ~ identifier ~ generic_params? ~ "(" ~ method_param_list? ~ ")" ~ return_type_spec? ~ block }
+method_param_list = { method_param ~ ("," ~ method_param)* }
+method_param = { "self" | param }
+
+interface_decl = { visibility? ~ "interface" ~ base_type ~ generic_params? ~ interface_body }
+interface_body = { "{" ~ interface_member* ~ "}" }
+interface_member = {
+    default_method
+    | method_signature
+    | interface_conversion_default
+    | interface_conversion_signature
+}
+method_signature = { "fn" ~ identifier ~ generic_params? ~ "(" ~ method_param_list? ~ ")" ~ return_type_spec? }
+default_method = { "fn" ~ identifier ~ generic_params? ~ "(" ~ method_param_list? ~ ")" ~ return_type_spec? ~ block }
+interface_conversion_signature = { conversion_keyword ~ type_expr }
+interface_conversion_default = { conversion_keyword ~ type_expr ~ block }
+
+enum_decl = { visibility? ~ "enum" ~ base_type ~ generic_params? ~ enum_body }
+enum_body = { "{" ~ enum_variant_decl* ~ "}" }
+enum_variant_decl = { identifier ~ ("(" ~ type_expr ~ ("," ~ type_expr)* ~ ")")? }
+
+statement = {
+    return_stmt
+    | throw_stmt
+    | defer_stmt
+    | for_stmt
+    | if_stmt
+    | match_stmt
+    | spawn_stmt
+    | wait_stmt
+    | break_stmt
+    | continue_stmt
+    | instead_stmt
+    | var_decl
+    | assignment_stmt
+    | expression_stmt
+}
+
+return_stmt = { "return" ~ expression? }
+throw_stmt = { "throw" ~ expression }
+instead_stmt = { "instead" ~ expression }
+defer_stmt = { "defer" ~ (block | expression) }
+break_stmt = { "break" }
+continue_stmt = { "continue" }
+expression_stmt = { expression }
+
+for_stmt = { for_range | for_count | for_condition | for_infinite }
+for_infinite = { "for" ~ block }
+for_condition = { "for" ~ expression ~ block }
+for_count = { "for" ~ integer_literal ~ block }
+for_range = { "for" ~ identifier ~ ("," ~ identifier)? ~ ":=" ~ "range" ~ expression ~ block }
+
+if_stmt = { "if" ~ expression ~ block ~ else_clause? }
+else_clause = { "else" ~ (if_stmt | block) }
+
+match_stmt = { "match" ~ expression ~ "{" ~ match_arm+ ~ "}" }
+match_arm = { pattern ~ "=>" ~ (block | expression) }
+pattern = { enum_pattern | literal_pattern | binding_pattern | wildcard_pattern }
+wildcard_pattern = { "_" }
+binding_pattern = { identifier }
+literal_pattern = { literal }
+enum_pattern = { identifier ~ "(" ~ pattern_list? ~ ")" }
+pattern_list = { pattern ~ ("," ~ pattern)* }
+
+spawn_stmt = { "spawn" ~ (block | expression) }
+wait_stmt = { "wait" ~ "{" ~ wait_arm+ ~ "}" }
+wait_arm = { (wait_receive | wait_default | wait_timeout) ~ "=>" ~ (block | expression) }
+wait_receive = { identifier ~ ":=" ~ "<<" ~ expression }
+wait_default = { "default" }
+wait_timeout = { "timeout" ~ "(" ~ expression ~ ")" }
+
+assignment_stmt = { lvalue ~ assign_op ~ expression }
+lvalue = { identifier ~ (member_access | index_access)* }
+assign_op = { "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "&=" | "|=" | "^=" }
+
+expression = { or_expr ~ ("?" ~ expression ~ ":" ~ expression)? }
+or_expr = { and_expr ~ (or_op ~ and_expr)* }
+and_expr = { bitor_expr ~ (and_op ~ bitor_expr)* }
+bitor_expr = { bitxor_expr ~ (bitor_op ~ bitxor_expr)* }
+bitxor_expr = { bitand_expr ~ (bitxor_op ~ bitand_expr)* }
+bitand_expr = { eq_expr ~ (bitand_op ~ eq_expr)* }
+eq_expr = { cmp_expr ~ (eq_op ~ cmp_expr)* }
+cmp_expr = { shift_expr ~ (cmp_op ~ shift_expr)* }
+shift_expr = { add_expr ~ (shift_op ~ add_expr)* }
+add_expr = { mul_expr ~ (add_op ~ mul_expr)* }
+mul_expr = { unary_expr ~ (mul_op ~ unary_expr)* }
+
+or_op = { "||" }
+and_op = { "&&" }
+bitor_op = { "|" }
+bitxor_op = { "^" }
+bitand_op = { "&" }
+eq_op = { "==" | "!=" }
+cmp_op = { "<=" | ">=" | "<" | ">" }
+shift_op = { "shl" | "shr" }
+add_op = { "+" | "-" }
+mul_op = { "*" | "/" | "%" }
+
+unary_expr = {
+    channel_receive
+    | not_expr
+    | neg_expr
+    | bitnot_expr
+    | postfix_expr
+}
+not_expr = { "!" ~ unary_expr }
+neg_expr = { "-" ~ unary_expr }
+bitnot_expr = { "~" ~ unary_expr }
+channel_receive = { "<<" ~ postfix_expr }
+
+postfix_expr = { primary_expr ~ postfix_op* }
+postfix_op = {
+    call_op
+    | member_access
+    | index_access
+    | type_cast
+    | error_propagation
+    | channel_send
+    | catch_block
+    | instead_fallback
+}
+catch_block = { "catch" ~ block }
+instead_fallback = { "instead" ~ expression }
+
+call_op = { "(" ~ arg_list? ~ ")" }
+member_access = { "." ~ member_name }
+member_name = @{ identifier | "new" | "default" }
+index_access = { "[" ~ expression ~ "]" }
+type_cast = { "as" ~ type_expr }
+error_propagation = { "?" ~ !ternary_follow }
+ternary_follow = _{ expression ~ ":" }
+channel_send = { "<<" ~ expression }
+
+arg_list = { expression ~ ("," ~ expression)* }
+
+primary_expr = {
+    literal
+    | lambda_expr
+    | channel_new_expr
+    | new_expr
+    | struct_literal
+    | tuple_literal
+    | collection_literal
+    | grouped_expr
+    | identifier
+}
+new_expr = { "new" ~ (generic_type | base_type) ~ "(" ~ arg_list? ~ ")" }
+channel_new_expr = { "Channel" ~ "<" ~ type_expr ~ ">" ~ "." ~ "new" ~ "(" ~ arg_list? ~ ")" }
+grouped_expr = { "(" ~ expression ~ ")" }
+
+lambda_expr = { "(" ~ lambda_param_list? ~ ")" ~ type_expr? ~ "->" ~ (block | expression) }
+lambda_param_list = { lambda_param ~ ("," ~ lambda_param)* }
+lambda_param = { identifier ~ type_expr? }
+
+struct_literal = { type_expr ~ "{" ~ field_init_list? ~ "}" }
+field_init_list = { field_init ~ ("," ~ field_init)* ~ ","? }
+field_init = { identifier ~ ":" ~ expression }
+
+tuple_literal = { "(" ~ expression ~ "," ~ expression ~ ("," ~ expression)* ~ ","? ~ ")" }
+
+collection_literal = {
+    array_literal
+    | map_literal
+    | set_literal
+}
+array_literal = { "[" ~ (array_repeat | array_elements)? ~ ","? ~ "]" }
+array_repeat = { expression ~ ";" ~ expression }
+array_elements = { expression ~ ("," ~ expression)* }
+map_literal = { "(" ~ map_entry ~ ("," ~ map_entry)* ~ ","? ~ ")" }
+map_entry = { expression ~ ":" ~ expression }
+set_literal = { "{" ~ (expression ~ ("," ~ expression)*)? ~ ","? ~ "}" }
+
+literal = {
+    float_literal | integer_literal | bool_literal | char_literal
+    | fstring_literal | multiline_string_literal | string_literal | void_literal
+}
+
+integer_literal = @{ hex_literal | octal_literal | binary_literal | decimal_literal }
+decimal_literal = @{ ASCII_DIGIT ~ ("_"? ~ ASCII_DIGIT)* }
+hex_literal = @{ "0" ~ ("x" | "X") ~ ASCII_HEX_DIGIT ~ ("_"? ~ ASCII_HEX_DIGIT)* }
+octal_literal = @{ "0" ~ ("o" | "O") ~ ASCII_OCT_DIGIT ~ ("_"? ~ ASCII_OCT_DIGIT)* }
+binary_literal = @{ "0" ~ ("b" | "B") ~ ASCII_BIN_DIGIT ~ ("_"? ~ ASCII_BIN_DIGIT)* }
+
+float_literal = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ exponent? | ASCII_DIGIT+ ~ exponent }
+exponent = @{ ("e" | "E") ~ ("+" | "-")? ~ ASCII_DIGIT+ }
+
+bool_literal = { "true" | "false" }
+void_literal = { "Void" }
+char_literal = @{ "'" ~ (escape_sequence | !("'" | "\\") ~ ANY) ~ "'" }
+string_literal = @{ "\"" ~ (escape_sequence | !("\"" | "\\") ~ ANY)* ~ "\"" }
+multiline_string_literal = @{ "\"\"\"" ~ (!"\"\"\"" ~ ANY)* ~ "\"\"\"" }
+
+fstring_literal = ${ "f\"" ~ fstring_content* ~ "\"" }
+fstring_content = { fstring_interpolation | fstring_escape | fstring_text }
+fstring_interpolation = { "{" ~ expression ~ "}" }
+fstring_escape = @{ escape_sequence }
+fstring_text = @{ (!("\"" | "{" | "\\") ~ ANY)+ }
+
+escape_sequence = @{ "\\" ~ ("n" | "r" | "t" | "\\" | "\"" | "'" | "0" | "{" | "}") | "\\" ~ "x" ~ ASCII_HEX_DIGIT{2} | "\\" ~ "u" ~ "{" ~ ASCII_HEX_DIGIT{1,6} ~ "}" }
+
+block = { "{" ~ statement* ~ "}" }
+
+ASCII_BIN_DIGIT = _{ '0'..'1' }
+ASCII_OCT_DIGIT = _{ '0'..'7' }

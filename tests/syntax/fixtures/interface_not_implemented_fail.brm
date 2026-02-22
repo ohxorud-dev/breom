@@ -1,0 +1,7 @@
+interface Reader {
+    fn read() Int
+}
+
+fn main() Int {
+    return 0
+}

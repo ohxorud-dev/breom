@@ -1,0 +1,28 @@
+fn t(ch Channel<Int>) {
+    ch << 4301
+}
+
+fn send_value(ch Channel<Int>, v Int) {
+    ch << v
+}
+
+fn send_after(ch Channel<Int>, v Int, ms Int) {
+    sleep(ms)
+    ch << v
+}
+
+fn main() {
+    ch := Channel<Int>.new(10)
+    spawn t(ch)
+
+    println("Main: Waiting for value...")
+
+    wait {
+        val := << ch => {
+            print("Main: Received ")
+            println(val as String)
+        }
+    }
+
+    println("Main: Finished")
+}

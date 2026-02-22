@@ -1,0 +1,109 @@
+@test
+fn set_basic_ops() {
+    s := {1, 2, 3}
+    assert(s.len() == 3)
+    assert(s.contains(1))
+    assert(s.contains(3))
+    assert(s.contains(99) == false)
+
+    s.add(3)
+    assert(s.len() == 3)
+
+    s.add(4)
+    assert(s.len() == 4)
+    assert(s.contains(4))
+
+    assert(s.remove(4) == true)
+    assert(s.contains(4) == false)
+    assert(s.len() == 3)
+
+    assert(s.remove(404) == false)
+    assert(s.len() == 3)
+}
+
+@test
+fn set_duplicates_and_collisions() {
+    dup := {5, 5, 5}
+    assert(dup.len() == 1)
+    assert(dup.contains(5))
+
+    coll := {0, 30, 79}
+    assert(coll.contains(30))
+    assert(coll.contains(79))
+    assert(coll.remove(0) == true)
+    assert(coll.contains(30))
+    assert(coll.contains(79))
+
+    coll2 := {0, 30, 79}
+    assert(coll2.remove(30) == true)
+    assert(coll2.contains(79))
+}
+
+@test
+fn set_capacity_growth() {
+    cap := {0, 1, 2, 3, 4, 5, 6, 7}
+    cap.add(8)
+    assert(cap.len() == 9)
+    assert(cap.contains(8))
+}
+
+@test
+fn set_remove_all_and_readd() {
+    s := {10, 11, 12}
+    assert(s.len() == 3)
+
+    assert(s.remove(10) == true)
+    assert(s.remove(11) == true)
+    assert(s.remove(12) == true)
+    assert(s.len() == 0)
+
+    s.add(99)
+    s.add(100)
+    assert(s.len() == 2)
+    assert(s.contains(99))
+    assert(s.contains(100))
+}
+
+@test
+fn set_negative_values_and_zero() {
+    s := {0, -1, -2}
+    assert(s.len() == 3)
+    assert(s.contains(0))
+    assert(s.contains(-1))
+    assert(s.contains(-2))
+
+    assert(s.remove(-1) == true)
+    assert(s.contains(-1) == false)
+    s.add(-1)
+    assert(s.contains(-1))
+}
+
+@test
+fn set_churn_with_collisions() {
+    s := {0, 30, 79, 145}
+    assert(s.len() == 4)
+
+    assert(s.remove(30) == true)
+    assert(s.remove(79) == true)
+    assert(s.len() == 2)
+
+    s.add(230)
+    s.add(311)
+    assert(s.len() == 4)
+    assert(s.contains(0))
+    assert(s.contains(145))
+    assert(s.contains(230))
+    assert(s.contains(311))
+}
+
+@test
+fn set_repeated_duplicate_adds_stable_len() {
+    s := {42, 42}
+    mut i Int = 0
+    for i < 50 {
+        s.add(42)
+        i = i + 1
+    }
+    assert(s.len() == 1)
+    assert(s.contains(42))
+}

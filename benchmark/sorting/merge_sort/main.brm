@@ -1,0 +1,78 @@
+fn main() Int {
+    values := [0]
+    for i := range 3200 {
+        values.push((i * 29 + 13) % 20000)
+    }
+
+    n := values.len()
+    temp := [0]
+    for i := range n {
+        if i == 0 {
+            continue
+        }
+        temp.push(0)
+    }
+
+    mut width Int = 1
+    for width < n {
+        mut left Int = 0
+        for left < n {
+            mut mid Int = left + width
+            if mid > n {
+                mid = n
+            }
+
+            mut right Int = left + (2 * width)
+            if right > n {
+                right = n
+            }
+
+            mut i Int = left
+            mut j Int = mid
+            mut k Int = left
+
+            for i < mid {
+                if j >= right {
+                    break
+                }
+
+                if values[i] <= values[j] {
+                    temp[k] = values[i]
+                    i = i + 1
+                } else {
+                    temp[k] = values[j]
+                    j = j + 1
+                }
+                k = k + 1
+            }
+
+            for i < mid {
+                temp[k] = values[i]
+                i = i + 1
+                k = k + 1
+            }
+
+            for j < right {
+                temp[k] = values[j]
+                j = j + 1
+                k = k + 1
+            }
+
+            left = left + (2 * width)
+        }
+
+        for idx := range n {
+            values[idx] = temp[idx]
+        }
+
+        width = width * 2
+    }
+
+    mut checksum Int = 0
+    for i := range 128 {
+        checksum = checksum + values[i]
+    }
+
+    println(checksum as String)
+    return 0
+}

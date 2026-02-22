@@ -1,0 +1,50 @@
+import net.tcp
+
+pub fn request(host String, port Int, req Request) Response throws {
+    mut socket Int = 0
+    mut attempts Int = 0
+    for attempts < 20 {
+        socket = tcp.connect(host, port) instead 0
+        if socket != 0 {
+            break
+        }
+        sleep(20)
+        attempts = attempts + 1
+    }
+
+    if socket == 0 {
+        throw new Error(f"http connect failed: {host}:{port}")
+    }
+
+    raw_req := f"{req.method} {req.path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\nContent-Length: {len(req.body)}\r\n{req.headers}\r\n{req.body}"
+
+    sent := tcp.send(socket, 0, raw_req) instead -1
+    if sent < 0 {
+        throw new Error("http send failed")
+    }
+
+    raw_resp := tcp.recv(socket) instead ""
+    if len(raw_resp) == 0 {
+        throw new Error("http recv failed or empty response")
+    }
+
+    return Response {
+        status: parse_status(raw_resp),
+        headers: parse_headers(raw_resp),
+        body: parse_body(raw_resp)
+    }
+}
+
+pub fn get(host String, port Int, path String) Response throws {
+    req := Request {
+        method: "GET",
+        path: path,
+        headers: "",
+        body: ""
+    }
+    return request(host, port, req)
+}
+
+fn parse_status(raw String) Int {}
+fn parse_headers(raw String) String {}
+fn parse_body(raw String) String {}

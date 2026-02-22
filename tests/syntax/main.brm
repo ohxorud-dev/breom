@@ -1,0 +1,27 @@
+fn make_safe_box(v Int) SafeBox throws {
+    return new SafeBox(v)?
+}
+
+fn make_point_for_member() Point {
+    return Point { x: 11, y: 22 }
+}
+
+fn make_nested_metrics() NestedMetrics {
+    return NestedMetrics {
+        inner: Metrics { temp: 10.25, ok: true, label: "nested" }
+    }
+}
+
+fn get_safe_value(v Int) Int throws {
+    box SafeBox = new SafeBox(v)?
+    return box.value
+}
+
+fn make_generic_box_value(v Int) GenericBox<Int> {
+    return GenericBox<Int> { value: v }
+}
+
+fn ternary_with_question_and_colon(v Int) Int throws {
+    n := get_safe_value(v)?
+    return n > 0 ? 11 : 22
+}

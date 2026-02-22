@@ -1,0 +1,14 @@
+import file.io
+
+fn main() Int {
+    path := ".tmp/io_fixture.txt"
+
+    mut checksum Int = 0
+    for 20 {
+        data String = io.read(path)
+        checksum = checksum + data.len()
+    }
+
+    println(checksum as String)
+    return 0
+}

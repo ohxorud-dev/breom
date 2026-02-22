@@ -1,0 +1,14 @@
+pub struct Packet {
+    pub conn Int
+    pub data String
+}
+
+pub struct BindResult {
+    pub socket Int
+    pub rx Channel<Packet>
+}
+
+pub fn connect(address String, port Int) Int throws {}
+pub fn bind(port Int) BindResult throws {}
+pub fn send(socket Int, conn Int, data String) Int throws {}
+pub fn recv(socket Int) String throws {}

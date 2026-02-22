@@ -1,0 +1,13 @@
+attribute bench(iterations Int, warmup Int)
+
+@test
+fn attribute_executes_function() {
+    assert(add(20, 22) == 42)
+}
+
+@bench(10 + 2, 5 * 2)
+@test
+fn multiple_attributes_on_single_function_are_allowed() {
+    value := add(1, 2)
+    assert(value == 3)
+}

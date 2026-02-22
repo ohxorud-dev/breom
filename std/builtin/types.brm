@@ -1,0 +1,85 @@
+/* Top type - supertype of all types */
+struct Any {}
+
+/* Unit type - represents no value (used for channel signaling) */
+struct Void {}
+
+/* Boolean type (true, false) */
+struct Bool {}
+
+/* 64-bit floating point (default) */
+struct Float {}
+
+/* 32-bit floating point */
+struct Float32 {}
+
+/* Platform-dependent signed integer */
+struct Int {}
+
+/* 8-bit signed integer */
+struct Int8 {}
+
+/* 16-bit signed integer */
+struct Int16 {}
+
+/* 32-bit signed integer */
+struct Int32 {}
+
+/* 64-bit signed integer */
+struct Int64 {}
+
+/* UTF-8 immutable string */
+struct String {
+    pub fn len() Int {}
+}
+
+/* Unicode Scalar Value (4 bytes) */
+struct Char {}
+
+/* Platform-dependent unsigned integer */
+struct UInt {}
+
+/* 8-bit unsigned integer */
+struct UInt8 {}
+
+/* 16-bit unsigned integer */
+struct UInt16 {}
+
+/* 32-bit unsigned integer */
+struct UInt32 {}
+
+/* 64-bit unsigned integer */
+struct UInt64 {}
+
+/* Alias for UInt8, used for binary data */
+struct Byte {}
+
+/* Error value (throws/catch, get failures, etc.) */
+struct Error {
+    pub message String
+}
+
+/* Dynamic array (growable list) */
+struct DynamicArray<T> {
+    pub fn len() Int {}
+    pub fn push(value T) {}
+    pub fn pop() T {}
+    pub fn get(index Int) T {}
+}
+
+/* Hash Map (key-value store) */
+struct Map<K, V> {
+    pub fn len() Int {}
+    pub fn get(key K) V {}
+    pub fn set(key K, value V) {}
+    pub fn contains(key K) Bool {}
+    pub fn delete(key K) Bool {}
+}
+
+/* Hash Set (unique collection) */
+struct Set<T> {
+    pub fn len() Int {}
+    pub fn add(value T) {}
+    pub fn contains(value T) Bool {}
+    pub fn remove(value T) Bool {}
+}

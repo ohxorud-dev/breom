@@ -1,0 +1,23 @@
+import net.tcp
+
+pub fn listen(port Int, handler fn(Request) Response) Void throws {
+    server := tcp.bind(port)
+    for {
+        wait {
+            packet := <<server.rx => {
+                req := Request {
+                    method: "GET",
+                    path: "/",
+                    headers: "",
+                    body: packet.data
+                }
+                resp := handler(req)
+                raw := f"HTTP/1.1 {resp.status} OK\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n"
+                raw = raw + resp.headers
+                raw = raw + "\r\n"
+                raw = raw + resp.body
+                tcp.send(server.socket, packet.conn, raw)
+            }
+        }
+    }
+}

@@ -1,0 +1,73 @@
+@test
+fn match_literal_arm_selection() {
+    x := 2
+    mut got Int = 0
+
+    match x {
+        1 => {
+            got = 11
+        }
+        2 => {
+            got = 22
+        }
+        _ => {
+            got = 33
+        }
+    }
+
+    assert(got == 22)
+}
+
+@test
+fn match_binding_arm_captures_value() {
+    x := 42
+    mut got Int = 0
+
+    match x {
+        n => {
+            got = n
+        }
+    }
+
+    assert(got == 42)
+}
+
+@test
+fn match_wildcard_fallback() {
+    x := 999
+    mut got Int = 0
+
+    match x {
+        1 => {
+            got = 1
+        }
+        _ => {
+            got = -1
+        }
+    }
+
+    assert(got == -1)
+}
+
+@test
+fn if_else_branch_selection() {
+    x := 5
+    mut got Int = 0
+
+    if x > 3 {
+        got = 10
+    } else {
+        got = 20
+    }
+
+    assert(got == 10)
+
+    x = 1
+    if x > 3 {
+        got = 10
+    } else {
+        got = 20
+    }
+
+    assert(got == 20)
+}

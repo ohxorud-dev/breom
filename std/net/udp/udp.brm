@@ -1,0 +1,7 @@
+struct BindResult {
+    pub socket Int
+    pub rx Channel<String>
+}
+
+fn bind(port Int) BindResult throws {}
+fn send(socket Int, address String, port Int, data String) Int throws {}

@@ -1,0 +1,25 @@
+fn main() Int {
+    values := [0]
+    for i := range 20000 {
+        values.push(i * 3)
+    }
+
+    target := (values.len() - 7) * 3
+    mut checksum Int = 0
+    for i := range 6000 {
+        idx := linear_search(values, target)
+        checksum = checksum + idx + (i % 5)
+    }
+
+    println(checksum as String)
+    return 0
+}
+
+fn linear_search(values []Int, target Int) Int {
+    for i, v := range values {
+        if v == target {
+            return i
+        }
+    }
+    return -1
+}
